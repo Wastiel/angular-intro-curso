@@ -69,7 +69,7 @@
 - Nossa Aplicação pode ser dividida em módulos.
 	- Melhor para organizarmos a nossa aplicação
 
-## Ambiente de Desenvolvimento
+## 02. Ambiente de Desenvolvimento
 
 - Vídeo Aula
 [Vídeo Aula](https://youtu.be/XxPjcMTZz5w)
@@ -103,4 +103,38 @@
 	- Atom
 	- Sublime Text
 
+## 03.Hello, World! Criando primeiro projeto e o primeiro Compoennte
+
+- [Vídeo Aula](https://youtu.be/wBrIT2Z8t5I)
+- Fazer o nosso primeiro projeto
+- Fazer o componente dentro da nossa aplicação. 
+- Usar o angular CLI para criar o nosso projeto
+- ng new primeiro-projeto - Comando para criar o primeiro projeto dentro de um shell e da pasta que desejariamos criar.
+	- SCSS (Sass)
+	- Renderização no Servidor (SSR):
+	- Instalação demora um pouco
+- Usamos o comando ng-serve, para iniciar o servidor.
+- Usar o google, pelo fato de o Angular ser parte da google.
+- Fazer manualmente, para entendermos como o fluxo funciona
+- Entender o padrão de nomenclatura dos padrões do CLI, apra entender o guide do Angular 2
+- @Anotation = A decoration no angular
+- @Component({}) funcionalidade da actma script
+- Temos importar esta funcionalidade com o seguinte comando import { Component } from "@angular/core";
+- Meta dados
+- Selector, com web componentes, criando componentes HTML customizados.
+- Estruturas semelhantes de código.
+- Criamso um component com o seguinte código:
+	`````typescript
+		import { Component } from "@angular/core";
+
+		@Component({
+		    selector: 'meu-primeiro-component',
+		    template: `
+		    <p>Meu primeiro component com Angular2! </p>
+		    `
+		})
+		class MeuPrimeiroComponent{}
+
+	`````
+- Após criado este primeiro componente, temos que apontar dentro do nosso componente principal, como achamos o determinado componente. 
 
