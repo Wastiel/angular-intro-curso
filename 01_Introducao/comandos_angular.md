@@ -38,4 +38,13 @@
 	- Renderização no Servidor (SSR):
 	- Instalação demora um pouco
 - ng-serve, para iniciar o servidor.
+- @Componente - Parecido com anotation do java
+- Tamplate literal, um tableta sem concatenação
+	- template: `
+	Contacenta tudo aqui dentro
+	 `
 - Comando de Component import { Component } from "@angular/core";
+- ng g m cursos
+	- modulo com angular CLI
+- ng g c cursos 
+	- Crio todos so componente.
