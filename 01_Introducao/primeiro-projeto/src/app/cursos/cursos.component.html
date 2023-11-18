@@ -1,3 +1,10 @@
-<p>cursos works!</p>
+<p>Lista de cursos da loraine {{nomePortal}} </p>
+
+<ul>
+    <li *ngFor="let curso of cursos">
+    {{curso}}
+</li>
+
+</ul>
 
 <app-cursos-detalhe></app-cursos-detalhe>

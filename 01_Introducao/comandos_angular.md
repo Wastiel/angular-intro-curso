@@ -48,3 +48,5 @@
 	- modulo com angular CLI
 - ng g c cursos 
 	- Crio todos so componente.
+- ng g s cursos
+	- Crio a classe de serviço 
