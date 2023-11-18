@@ -339,6 +339,176 @@
 		- Assim ninguem vai ver este componente.
 	- Assim temos um controle maior do que os modulos podem ver.
 
+## 06. Introdução aos Templates
+
+- Componentes criados, sempre possuem um html
+- Dentor é onde vamos colocar nosso código javaScript. 
+	- Parte da Viw
+	- Vai poder ver e interagir com a aplicação
+	- Podemos criar a nossa aplicação
+	- Seletor vira uma tag html
+	- utiliza webcomponent - boa pratica nos dias hoje
+	- HTML simples
+	- Formulários
+	- Tampletes entram na dinamicidade
+- JavaScript nao é fortemente tipada.
+- Com typescript podemos tipar a variavel.
+	- string
+	- number
+	- any - qualquer coisa
+- Criamos uma variavel dentro do cursos.component.
+	- Toda a variavel deve ser inicializada dentro do contrutor ou fora do mesmo
+	````typescript
+	export class CursosComponent {
+
+	  nomePortal: string;
+
+	  constructor(){
+	    this.nomePortal = 'https://loiane.training/continuar-curso/angular';
+	  }
+
+	}
+	````
+	- Para colocar a informação dentro do portal, a gente usa interpolação {{}}:
+	````html
+		<p>Lista de cursos da loraine {{nomePortal}} </p>
+	````	
+- Vamos criar uma lista dentro da nossa classe e utilizar de forma dinamica no angular
+	- Criamos um vetor dentro do nosso contrutor
+	````typescript
+	export class CursosComponent {
+
+	  nomePortal: string;
+
+	  cursos: string[] = ['java', 'ext JS', 'Angular' ]
+
+	  constructor(){
+	    this.nomePortal = 'https://loiane.training/continuar-curso/angular';
+	  }
+
+	}
+	````
+	- Após aplicamos a lista dentro do html:
+		````
+		<ul>
+    		<li *ngFor="let curso of cursos">
+    		{{curso}}
+		</li>
+		````
+- Estutrura
+	- Tamplete in line, recomendado utilizar somente quando tivermos um HTML em até 3 linhas.
+		````typescript
+		import { Component } from '@angular/core';
+
+			@Component({
+			  selector: 'meu-primeiro-component',
+			  template: ` <p>Meu primeiro component com Angular2!</p> `,
+			})
+			export class MeuPrimeiroComponent {}
+		```` 
+	- inline, você tira o URL das variaveis dentro do component e adicionar o template e o style da maneira que desejar.
+
+## 07. Serviços (Services) e injeção de dependencias.
+
+- Informações são dinamicas e vem de um servirdor
+- mostrar informações para o usuário e interagir com o usuário.
+- Separar as informações em classes de serviço.
+- Como funciona
+	- Componente precisa de uma informação para mostrar na tela
+	- Serviço entra como intermedio para receber a informação do nosso servidor
+	- Nosso Servidor retorna as informações conforme linguagem (java, phyton, e etc)
+- Vamos utilizar um ng para criar um serviço.
+	- ng g s - serviço
+	- ng g c - componente
+- o ng g c cria dois arquivos
+	- Arquivos cursos.service.spec.ts de testes
+	- Arquivo services.ts que é o arquivo de serviço (esqueleto).
+- instancia no javaScript
+	- var servico = new CursosService();
+	- Classes de serviço para conectar no servidor
+- Injeção de dependencias
+	- Angular vai fornecer automaticamente uma instancia de dependencia
+	- Existe em varias linguagens
+	- Fazer com a linguagem fornecea uma instancia de uma classe
+	- Ex:
+		- Leitor assiduo de jornal de papel.
+			- Cenario 1 - ir até a banca e comprar o jornal
+			- nao seria melhor pedir para alguem entregar o jornal?
+			- Vai obter o serviço automaticamente
+- No exepmlo, pegamos o código via serviço e nao estaticamente, conforme abaixo:
+	- Dentro do nosso componente, mudamos os apontamentos paraum serviço de obtenção da informação
+		````typescript
+		import { Component } from '@angular/core';
+		import { CursosService } from './cursos.service';
+
+		@Component({
+		  selector: 'app-cursos',
+		  templateUrl: './cursos.component.html',
+		  styleUrls: ['./cursos.component.scss']
+		})
+		export class CursosComponent {
+
+		  nomePortal: string;
+
+		  cursos: string[];
+
+		  constructor(private cursosService: CursosService){
+		    this.nomePortal = 'https://loiane.training/';
+		    
+		    var servico = new CursosService();
+
+		    this.cursos = this.cursosService.getCursos();
+
+		  }
+
+		}
 
 
-	
+		````
+	- Depois Ajustamos a nossa service:
+		````typescript
+		import { Injectable } from '@angular/core';
+
+		@Injectable({
+		  providedIn: 'root'
+		})
+		export class CursosService {
+
+		  constructor() {  }
+
+		  getCursos(){
+		    return ['java', 'ext JS', 'Angular' ];
+		  }
+
+		}
+
+		````
+	- e dentro do mudle, adicionamos os provedores de serviço:
+		````typescript
+		import { NgModule } from '@angular/core';
+		import { CommonModule } from '@angular/common';
+
+		import { CursosComponent } from './cursos.component';
+		import { CursosDetalheComponent } from './cursos-detalhe/cursos-detalhe.component';
+		import { CursosService } from './cursos.service';
+
+
+
+		@NgModule({
+		  declarations: [
+		    CursosComponent,
+		    CursosDetalheComponent
+		  ],
+		  imports: [
+		    CommonModule
+		  ],
+		  exports: [
+		    CursosComponent
+		  ],
+		  providers: [CursosService]
+		})
+		export class CursosModule { }
+
+		````
+
+
