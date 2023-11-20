@@ -50,3 +50,8 @@
 	- Crio todos so componente.
 - ng g s cursos
 	- Crio a classe de serviço 
+- ng2-bootstrap bootstrap --save
+	- Comando para integrar o bootstrap ao projeto npm install 
+- Criação de componente e módulo
+	- ng g m meu-form
+	- ng g c meu-form

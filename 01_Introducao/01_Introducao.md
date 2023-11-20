@@ -197,8 +197,9 @@
  		app-meu-primeiro2
  	- <app-meu-primeiro2></app-meu-primeiro2>
 
-## 04.TypeScript 
+## 04.Introdução ao TypeScript para Angular
 
+- [Vídeo Aula](https://youtu.be/cNJVzgUH0gA)
 - Desmistificar TypeScript
 - Vantagens com Angular 02
 - Qualquer projeto javaScritp
@@ -341,6 +342,7 @@
 
 ## 06. Introdução aos Templates
 
+- [Vídeo Aula](https://youtu.be/36kd3uR-hG8)
 - Componentes criados, sempre possuem um html
 - Dentor é onde vamos colocar nosso código javaScript. 
 	- Parte da Viw
@@ -410,6 +412,7 @@
 
 ## 07. Serviços (Services) e injeção de dependencias.
 
+- - [Vídeo Aula](https://youtu.be/36kd3uR-hG8)
 - Informações são dinamicas e vem de um servirdor
 - mostrar informações para o usuário e interagir com o usuário.
 - Separar as informações em classes de serviço.
@@ -510,5 +513,47 @@
 		export class CursosModule { }
 
 		````
+# 08. Plugins Atom e VS. Code
 
-
+- - [Vídeo Aula](https://youtu.be/36kd3uR-hG8)
+- Angular CLI - Ferramenta oficial. 
+- Editor de texto favorito
+	- Atom
+	- VSCode
+- Atom
+	- Setings
+		- Plugins
+			- angular-22-typeScript-snippets - gregonet
+				- tipo alias do progress
+			- atom-typescript
+				- compila e sinaliza erro
+			- linter
+				- mostra erros de compilação
+			- file-icons
+				- icones coloridos.
+			- open-recent
+				- abre projetos recentes
+			- pigments
+				- Mostra a cor quando estamos usando CSS
+			- Instalar os plugins é so clicar no install.
+		- Temas
+			- One dark
+- VsCode
+	- Plugins
+		- Angular 2, 4 and upcoming latest TypeScript HTML
+			- Snippets, autor Balram Chavan
+		- Angular v2 TypeScripts Snippets
+			- Snippets, johnpapa
+		- Atom One Dark Theme
+			- Tema
+		- Auto Import
+			- Importa automaticamente
+		- HTML Snippets
+			- Snippet HTML
+			- Abre e fecha Tag
+		- ionic 2 commands with snippets
+			- thavarjan
+		- vscode-icons
+			- icones vscode
+			- Roberto Huertas
+		- Terminal Integrado
