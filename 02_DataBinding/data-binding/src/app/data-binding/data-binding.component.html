@@ -1,0 +1,143 @@
+<section class="proprety-binding">
+    <!--
+    <section>
+        <h3>Interpolation / Interpolação</h3>
+        <p>String renderizada com interpolação: {{ url }}</p>
+        <p>Resultado de 1+1 é: {{ 1 + 1 }}</p>
+        <p>Resultado de 1+1 não é {{ 1 + 1 + getValor() }}</p>
+        <p>Curso de Angular eu gosto do curso: {{ cursoAngular && getCurtirCurso() }}</p>
+    </section>article>
+
+    <article>
+        <h3>Proprety Binding</h3>
+        <img src="{{ urlImagem }}">
+        <img [src]="urlImagem">
+        <img bind-src="urlImagem">
+    </article>   
+
+    <article>
+        <h3>Class e Style Binding</h3>
+        <div>
+            Selecione uma classe:
+            <select #classe (change)="0">
+                <option value="alert-success">Sucesso</option>
+                <option value="alert-info">Info</option>
+                <option value="alert-warning">Warning</option>
+                <option value="alert-danger">Danger</option>                
+            </select>
+            <br><br>
+        </div>
+
+        <div class="alert {{ classe.value}}">
+            Texto colorido conforme valor do combobox.
+        </div>
+
+        <div class="alert" role="alert" 
+            [class.alert-success]="classe.value == 'alert-success'">
+            Sucesso
+        </div>
+        <div class="alert" role="alert"
+            [class.alert-info]="classe.value == 'alert-info'">
+            Info
+        </div>
+        <div class="alert" role="alert"
+            [class.alert-warning]="classe.value == 'alert-warning'">
+            Alerta
+        </div>
+        <div class="alert" role="alert"
+            [class.alert-danger]="classe.value == 'alert-danger'">
+            Erro
+        </div>
+
+        <div class="alert alert-danger" role="alert"
+        [style.display]="classe.value == 'alert-danger' ? 'block' : 'none'">
+            Esse texto somente aparece em caso de erro.
+        </div>
+    </article> -->
+
+</section>
+
+<section class="event-binding">
+
+    <!--
+    <article>
+        <h3>Event binding</h3>
+        <div>
+            <button (click)="botaoClicado()" class="btn btn-primary">Me Clique!</button>
+        
+        <br><br>
+
+        <input type="text" 
+            (keyup)="onKeyUp($event)" 
+            (keyup.enter)="salvarValor(campoInput.value)"
+            (blur)="salvarValor($any($event.target).value)"
+            #campoInput/>
+
+        <p>Valura atual: {{ valorAtual }}</p>
+        <p>Valura salvo: {{ valorSalvo }}</p>
+
+        <br>
+
+        <span 
+            (mouseover)="onMouseOverOut()"
+            (mouseout)="onMouseOverOut()"
+            [class.highlight]="isMouseOver">
+            Passe o mouse sobre mim
+        </span>
+
+        </div>
+    </article>
+    -->
+
+</section>
+
+<section class="two-way-binding">
+    <!--
+    <article>
+        <h3>Two-Way data binding</h3>
+        <div>
+            <input type="text"
+            [value]="nome"
+            (input)="nome = campoInput.value"
+            #campoInput/>
+
+            <input type="text"
+            (ngModel)="nome"
+            (ngModelChange)="nome = campoInput.value"
+            #campoInput/>
+
+            <input type="text" [(ngModel)]="nome"/>            
+
+            <input type="text" bindon-ngModel="nome"/>
+            
+            <p>Você digitou: {{ nome }}</p>
+
+            <input type="text" [(ngModel)]="pessoa.nome"/>
+            <input type="text" [(ngModel)]="pessoa.idade"/>
+
+            <br><br>
+            <p>Meu nome é: {{ pessoa.nome }}</p>
+            <p>Minha idade é: {{ pessoa.idade }}</p>
+
+            
+
+        </div>
+    </article>
+-->
+</section>
+
+<!--<app-meu-form></app-meu-form>-->
+
+<section class="input-output-properties">
+    <article>
+        <h3>Input/Output Properties</h3>
+        <div>
+            <app-curso [nome]="nomeDoCurso"></app-curso>
+                       
+            <contador [valor]="valorInicial"
+               (mudouValor)="onMudouValor($event)">
+            </contador>
+        </div>
+    </article>
+
+</section>

@@ -19,7 +19,6 @@ export class CursosComponent {
 
     this.cursos = this.cursosService.getCursos();
 
-
   }
 
 }
