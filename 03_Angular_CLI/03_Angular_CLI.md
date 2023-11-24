@@ -125,6 +125,7 @@
 
 ## 05. Angular CLI: Estrutura do projeto
 
+- [Vídeo Aula](https://youtu.be/TZDWgAfYYqo)
 - Angular CLI e sua estruturação
 	- Analisar todos os diretórios que o angular cria
 - Vantagens Angular CLI?
@@ -194,20 +195,57 @@
 
 ## 06. Angular CLI: Gerando build de produção
 
+- [Vídeo Aula](https://youtu.be/U0zHj14mNrI)
+- Build de produção
+- Comandos para o build
+	- ng build --target=development --enviroment=dev
+	- ng build --dev --e=dev
+	- ng build --dev
+	- ng build
+- Dentro do bild
+	- Gera dentro do diretório DIST
+	- Possui 3 arquivos
+		- index.html
+			- limpo
+		- Inline
+		- Polyfills
+- Build de DEV
+	- Todo o código junto, identado, com as variaveis e etc.
+	- Possível utilizar para debug.
+- Build Final
+	- ng build --dev --e=dev
+	- obfusca e minifica o código JS da aplicação
+	- css e templates HTML ja minificados e incluídos em main.bundle.js
+	- O index.html, nao minifica.
+- Germaos o nosso ng build de desenvolvimento
+	- ng build
+	- Gerou alguns arquivos minizados
+- INstalar um servidor http
+	- npm install http-server -g
+- BUild de produção
+	- ng build --prd
+	
+
 ## 07. Angular CLI: instalando bibliotecas (bootstrap, jquery, materialize, lodash)
 
-
-Fazer com form group e form control. 
-
-- ng new Aula_04_Diretivas
-- ng g component diretiva-ngif
-- ng g service diretiva-ngif/diretiva-ngif
-- ng config schematics.@schematics/angular:component.style scss
-- ng add @angular-eslint/schematics@16
- constructor() {
-        // do nothing.
-    }
-
-    foo() {
-        // do nothing.
-    }
+- Instalar bibliotecas externas nos projetos.
+- Criamos um novo projeto
+	- ng new angular-cli-libs-externas
+- Bootstrap
+	- ng add @ng-bootstrap/ng-bootstrap
+	- package Json, temos a versão instalada
+		````json
+		 "dependencies": {
+			"bootstrap": "^5.2.3",
+		}
+		````
+	-  Dentro do caminho vemos os arquivos princiapis do bootstrap
+		- node_modules/bootstrap/distr/css
+	- jquery instalado, dependencia do bootstrap
+	- tether
+		- biblitca de meio de campo entre o jquery e a nossa aplicação.
+	- Automaticamente o importou o bootstrap CSS na classe tyles.css 
+		- Acredito que seja em função da nova maneira de instalar o bootstrap
+		- Caso precisse, pode colocar na mão da seguinte maneira
+			- //@import '~boostrap/dist/css/boostrap.min.css'
+- 
