@@ -126,4 +126,15 @@
 		        // do nothing.
 		    }
 		````
-	
+- Teste automatizado do angular
+	- ng test
+
+- Comandos para o build
+	- ng build --target=development --enviroment=dev
+	- ng build --dev --e=dev
+	- ng build --dev
+	- ng build
+- INstalar um servidor http
+	- npm install http-server -g
+- Instalar Angular
+	- ng add @ng-bootstrap/ng-bootstrap
