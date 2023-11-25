@@ -228,10 +228,11 @@
 
 ## 07. Angular CLI: instalando bibliotecas (bootstrap, jquery, materialize, lodash)
 
+- [Vídeo Aula](https://youtu.be/U0zHj14mNrI)
 - Instalar bibliotecas externas nos projetos.
 - Criamos um novo projeto
 	- ng new angular-cli-libs-externas
-- Bootstrap
+### Bootstrap
 	- ng add @ng-bootstrap/ng-bootstrap
 	- package Json, temos a versão instalada
 		````json
@@ -245,7 +246,36 @@
 	- tether
 		- biblitca de meio de campo entre o jquery e a nossa aplicação.
 	- Automaticamente o importou o bootstrap CSS na classe tyles.css 
-		- Acredito que seja em função da nova maneira de instalar o bootstrap
-		- Caso precisse, pode colocar na mão da seguinte maneira
-			- //@import '~boostrap/dist/css/boostrap.min.css'
-- 
+- Por erros no processo a cima, eu mudei algumas questões e e refiz o processo de instalação
+- npm install bootstrap@latest
+	- Instalação do bootstrap
+- npm install jquery@latest
+	- instalação do jquery
+- Ajustado o caminho do css dentro dos scritps dentro do angular.json
+	-  "node_modules/jquery/dist/jquery.min.js",
+  	- "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+ - Posterior o processo funcionou
+ - Coloquei elementos do angular e o msmo funcionou.
+ - https://www.npmjs.com/package/bootstrap
+ ### Materialize
+ 	- npm install materialize-css -save
+ 	- npm install angular2-materialize --save
+ 	- npm install jquert@^2.2.4 --save
+ 	- Caso de erro no fonte, você pode importar o módulo do materialize, dentro do app.module.ts
+ 		- import { MaterializeModule } from 'angular2-materialize';
+ 		- imports:[MaterializeModule]
+
+ ### Biblioteca Global
+	- npm install --save lodash
+	- Importação de tudo dentro do componente
+		- import * as _ from 'lodash';
+		- Faz a mesma cosia que o typings
+	- npm install --save @types/lodash
+- utilizamos a seguinte função
+	- <p *ngFor="let item of list">{{ item }}</p>
+	- através de um fluxo 
+		- list = _.map([1,2,3], (n) => `# ${n}`);}
+- Verificamos o fluxo de processo de 3 maneiras de utilizar libs externas no angular
+ - Documentações
+ 	- https://www.npmjs.com/package/bootstrap
+ 	- https://www.npmjs.com/package/angular2-materialize
