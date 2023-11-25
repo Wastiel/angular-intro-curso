@@ -1,0 +1,152 @@
+# Diretivas
+
+# 01. Introdução e tipos de diretivas no Angular
+
+- [Vídeo Aula](https://youtu.be/rJNYm3-Tyns)
+- Diretivas são a forma de passar instruções para o template
+	- Nos dao bastante poder
+	- Loop For
+	````html
+	<ul * ngFor="let curso of cursos"> 
+		{{ curso }}
+	</ul>
+	````
+	- O que este for está fazendo:
+		- Itere todos os cursos e a cada iteração, atribua o valor do elemento atual a uma variavél curso. Replique também o elemento <li> com o valor da variável curso a cada iteração
+- Componente também sao diretivas 
+	- Diretivas com template
+		````typescript
+			template:
+			<cursos-lista></li>cursos-lista>
+		````
+	- Crie um componente do Tipo (classe) especificado e renderize a view templlate desse componente nesse lugar
+- Dois tipos de diretivas
+	- Estruturais
+		- utilizadas para modificar o DOOM e o codigo html dentro do template
+			````typescript
+			*ngfor
+			* nfIf
+			`````
+	- Atributo
+		- Interagem com o elemento em que foram aplicadas
+			````typescript
+			ng-class
+			ng-style
+			````
+		- Modificar a clase e um estilo em css
+- 
+
+
+
+# 02. Diretivas: ngIf
+
+- [Vídeo Aula](https://youtu.be/7zJNIp44B60)
+	- Condicional ngIf para utilizarmos dentro do template
+	- Ela é um "se" no template
+	````typescript
+
+	var (cursos.length > 0){
+		// alguma lógica de programação
+	}else{
+		// Alguma outra lógica de programação
+	}
+	````
+
+- Criei um projeto novo
+	- ng new Aula_04_diretivas
+	- ng add @ng-bootstrap/ng-bootstrap
+	- npm install jquery@latest
+	- Ajustamos o arquivo angular.json, dentro das tag's script
+		- "node_modules/jquery/dist/jquery.min.js",
+  		- "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+- Criamos o componente ngif
+	- ng g c diretiva-ngif 
+- Toda a vez que criamos o componente com os comandos, dentro do app.moudle ja é setado para a utilização.
+- A nossa ideia é mostrar cursos, se a variavel cursos estiver preenchida, caso contrario, não faça nada.
+	````typescript
+		cursos: String[] = [];
+	````
+	````html
+	<h5>*ngIf</h5>
+	<div>
+	    Lista de cursos aqui.
+	</div>
+	````
+- Criamos uma div com o regramento
+	````html
+	<div *ngIf="cursos.length > 0">
+    Lista de cursos aqui.
+	</div>
+	<div *ngIf="cursos.length == 0">
+	    Não existem crusos para serem listados
+	</div>
+
+	````
+	- Isto não mostra a frase Lista de Cursos aqui
+	- Acima temos tipo um fluxo de if e else, com dois IF's
+- Criamos um botao para mudar o nosso elemento html
+	- Criamos algumas variaveis e uma função para ajustar o evento conforme botao
+		````typescript
+			 cursos: String[] = ["Angular2"];
+
+			  mostrarCursos: boolean = false;
+
+			  constructor(){}
+
+			  ngOnInit(){}
+
+			  onMostrarCursos(){
+			    this.mostrarCursos = !this.mostrarCursos;
+			  }
+		````
+	- Criamos uma lógica no html
+		````html
+		<div *ngIf="cursos.length == 0">
+    	Não existem crusos para serem listados
+		</div>
+
+		<div *ngIf="mostrarCursos">
+		    Lista de cursos aqui.
+		</div>
+		<div *ngIf="!mostrarCursos">
+		    Não existem crusos para serem listados
+		</div>
+
+		<br>
+
+		<button (click)="onMostrarCursos()">Mostrar ou esconder cursos</button>
+
+		````
+		- Nesta lógica do click, ao clicarmos o elemento é comentado ao clicarmos novamente o elemento é descomentado, assim dando a impressãod e aparecer e desaparecer.
+		- Toda a arver dom, vai ser criada e estanciada. E destruido conforme regra
+			- Cuidado ao usar o ngif, pois pode ser custoso em processamento.
+- Para solução, iremos usar o hidden
+	````html
+	<button (click)="onMostrarCursos()">Mostrar ou esconder cursos</button>
+
+		<h5>Hidden como alternativa</h5>
+		<div [hidden]="!mostrarCursos">
+		    Lista de cursos aqui.
+		</div>
+		<div [hidden]="mostrarCursos">
+		    Não existem crusos para serem listados
+		</div>
+	````
+- Quando utilizamos um ou outro?
+	- [hidden]
+		- Recomendado para arvore de elementos pequenas
+	- :* ngIf
+		- Recomendado para árvores de elementos grandes
+
+
+# 03. Diretivas: ngSwitch, ngSwitchCase e ngSwitchDefault
+# 04. Diretivas: ngFor
+# 05. Diretivas: sobre o * e template
+# 06. Diretivas: ngClass
+# 07. Diretivas: ngStyle
+# 08. Operador Elvis
+# 09. ng-content
+# 10. Criando uma diretiva de atributo: ElementRef e Renderer
+# 11. Diretivas: HostListener e HostBinding
+# 12. Diretivas: Input e Property Binding
+# 13. Criando uma diretiva de estrutura (ngElse)
