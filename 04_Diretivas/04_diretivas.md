@@ -135,11 +135,71 @@
 - Quando utilizamos um ou outro?
 	- [hidden]
 		- Recomendado para arvore de elementos pequenas
+		- Não recomendado para fluxo de segurança
 	- :* ngIf
 		- Recomendado para árvores de elementos grandes
+		- Recomendado para fluxo de segurança
+
+- Usei o ng lint de curiosidade no meu projeto e fiz alguns ajustes que foram solicitados
+	- === ao invés de ==
+	- sem construtores e metodos em branco
+	- variavel inicializada com um tipo, não definido o tipo de variavel
+		- Tipo String == 'teste', seria so tipo = teste;
 
 
 # 03. Diretivas: ngSwitch, ngSwitchCase e ngSwitchDefault
+
+- [Vídeo Aula](https://youtu.be/uToE2t9RHME)
+- Switch na programação
+	- Temos uma variavel
+	- Buscamos os valores até uma possivel parada.
+	- Caso não seja algum determinado valor, executamos o que está dentro do default
+	- Exemplo:
+		````java
+			var viewMode = 'mapa';
+			switch (viewMode){
+			case 'mapa': //logica
+				break;
+			case 'lista': //logica
+				break;
+			default: //logica padrao
+			}
+		````
+- Muito parecido, temos as difertivas:
+	ng-Switch e ngSwitchCas
+- Criamos o componente
+	- ng g c diretica-ngswitch
+	- adicionamos o seletor no nosso app.component
+	- Criamos uma variavel aba, com um determinado valor.
+	- mudamos alguns elementos, conforme fluxo de tela
+	- exemplo do fonte:
+		````html
+			<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark" >
+		    <div class="nav navbar-nav">       
+		        <a class="nav-item nav-link" 
+		            [class.active]="aba === 'home'"
+		            (click)="aba = 'home'">Home</a>                   
+		        <a class="nav-item nav-link" 
+		            [class.active]="aba === 'mapa'"
+		            (click)="aba = 'mapa'">Mapa</a>            
+		        <a class="nav-item nav-link" 
+		            [class.active]="aba === 'lista'"
+		            (click)="aba = 'lista'">Lista</a>
+		      </div>    
+		</nav>
+
+
+		<div class="container" [ngSwitch]="aba">
+		    <p *ngSwitchCase="'mapa'">Modo Mapa Ativado</p>
+		    <p *ngSwitchCase="'lista'">Modo Lista Ativado</p>
+		    <p *ngSwitchDefault="'lista'">Home</p>
+		</div>
+
+		<p>Mostrando o valor de Aba agora: {{ aba }}</p>
+		````
+
+
+
 # 04. Diretivas: ngFor
 # 05. Diretivas: sobre o * e template
 # 06. Diretivas: ngClass

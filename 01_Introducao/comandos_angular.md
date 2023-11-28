@@ -138,21 +138,8 @@
 	- npm install http-server -g
 - Instalar Angular
 	- ng add @ng-bootstrap/ng-bootstrap
-- - npm install bootstrap@latest
-	- Instalação do bootstrap
-- npm install jquery@latest
-	- instalação do jquery
-- Ajustado o caminho do css dentro dos scritps dentro do angular.json
-	-  "node_modules/jquery/dist/jquery.min.js",
-  	- "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
-  	- npm install materialize-css -save
- 	- npm install angular2-materialize --save
- 	- npm install jquert@^2.2.4 --save
- 	- Caso de erro no fonte, você pode importar o módulo do materialize, dentro do app.module.ts
- 		- import { MaterializeModule } from 'angular2-materialize';
- 		imports:[MaterializeModule]
- - Documentações
- 	- https://www.npmjs.com/package/bootstrap
- 	- https://www.npmjs.com/package/angular2-materialize
-
-
+	- Documentação - https://valor-software.com/ngx-bootstrap/#/
+- Caso precisse, pode colocar na mão da seguinte maneira
+	- @import '~boostrap/dist/css/boostrap.min.css'
+	- ~ o til pega da pasta do node modules.
+- 

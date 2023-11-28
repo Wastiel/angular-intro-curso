@@ -1,19 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-diretiva-ngif',
   templateUrl: './diretiva-ngif.component.html',
   styleUrls: ['./diretiva-ngif.component.css']
 })
-export class DiretivaNgifComponent implements OnInit{
+export class DiretivaNgifComponent {
 
-  cursos: String[] = ["Angular2"];
+  cursos = ["Angular2"];
 
-  mostrarCursos: boolean = false;
-
-  constructor(){}
-
-  ngOnInit(){}
+  mostrarCursos = false;
 
   onMostrarCursos(){
     this.mostrarCursos = !this.mostrarCursos;
