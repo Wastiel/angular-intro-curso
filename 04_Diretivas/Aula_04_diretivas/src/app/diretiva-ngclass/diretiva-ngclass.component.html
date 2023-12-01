@@ -1,0 +1,28 @@
+<!-- eslint-disable @angular-eslint/template/interactive-supports-focus -->
+<!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
+<p>diretiva-ngclass works!</p>
+
+
+<!--Sem usar ngClass-->
+<h1>
+    <i class="bi"
+      [class.bi-star]="!meuFavorito"
+      [class.bi-star-fill]="meuFavorito"
+  
+      (click)="onClick()"
+    ></i>
+  </h1>
+  
+  
+  
+  <!--Usando ngClass-->
+  <h1>
+    <i class="bi"
+      [ngClass]="{
+        'bi-star': !meuFavorito,
+        'bi-star-fill': meuFavorito
+      }"
+  
+      (click)="onClick()"
+    ></i>
+  </h1>

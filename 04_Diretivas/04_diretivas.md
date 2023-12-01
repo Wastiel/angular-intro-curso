@@ -198,15 +198,120 @@
 		<p>Mostrando o valor de Aba agora: {{ aba }}</p>
 		````
 
-
-
 # 04. Diretivas: ngFor
+
+- [Vídeo Aula](https://youtu.be/seEbP5FGcvo)
+- Permite  que a gente itere um array. 
+	- Simuilar a um loop for que usamos em programação
+		````java
+			for(let i = 0; i< cursos.length; i++){
+				let curso = cursos[i];
+			}
+		````
+- Criamos um componente ngfor
+	- ng g c diretiva-ngfor	
+- declarar variavel no for, tem que ser com o let
+- Conseguimos declarar um index
+- Criamos um array no nosso componente TS
+- Posterior criamos o for:
+	````html
+		<ul>
+		    <li *ngFor="let curso of cursos, let i = index">
+		    {{ i }} {{ curso }}
+		    </li>
+		</ul>
+
+		<ul>
+		    <li *ngFor="let curso of cursos">
+		    {{ curso }}
+		    </li>
+		</ul>
+	````
+- Acima estão duas maneiras de usar o for, uma focando no for simplificado e outra usando um contador. 
+
 # 05. Diretivas: sobre o * e template
+
+- [Vídeo Aula](https://youtu.be/e-OGZocglTA)
+- Vamos aprender, pq utilizamos o * antes dos comandos base, ngfor, ngswitch, ngif
+- Também sobre templates
+- Vamos nos basear na diretiva ngif
+- Sintaxe do * é um atalho para um template.
+- O angular cria um template (ng-template)
+- ngIf
+	````html
+		<ng-template [ngIf]="mostrarCursos">
+    		<div>Lista de cursos aqui.</div>
+		</ng-template>	
+	````
+- ngFor
+	````html		
+			<ul>
+			    <ng-template ngFor [ngForOf]= "cursos" let-curso let-i = "index">
+			    <li >
+			    {{ i+1 }} {{ curso }}
+			    </li>
+			    </ng-template>
+			</ul>
+	````
+- ngSwitch
+	````html
+		<h5>Removendo o * e usando o template</h5>
+
+		<div class="container" [ngSwitch]="aba">
+		    <ng-template [ngSwitchCase]="'mapa'">
+		        <p>Mapa</p>
+		    </ng-template>
+		    <ng-template [ngSwitchCase]="'lista'">
+		        <p>Lista</p>
+		    </ng-template>
+		    <ng-template [ngSwitchCase]="'home'" NgSwitchDefault>
+		        <p>Home</p>
+		    </ng-template>  
+		</div>
+	````
+
 # 06. Diretivas: ngClass
+
+- [Vídeo Aula](https://youtu.be/DCFJZzFwDKs)
+- Criamos o componente
+	- ng g c diretiva-ngclass
+- Exemplo de clicar em um icone
+	- tipo Coração do instagram
+- Exemplo usando e não usando ngclass
+	````html
+		<!--Sem usar ngClass-->
+		<h1>
+		    <i class="bi"
+		      [class.bi-star]="!meuFavorito"
+		      [class.bi-star-fill]="meuFavorito"
+		  
+		      (click)="onClick()"
+		    ></i>
+		  </h1>
+		  
+		  
+		  
+		  <!--Usando ngClass-->
+		  <h1>
+		    <i class="bi"
+		      [ngClass]="{
+		        'bi-star': !meuFavorito,
+		        'bi-star-fill': meuFavorito
+		      }"
+		  
+		      (click)="onClick()"
+		    ></i>
+		  </h1>
+	````
+
 # 07. Diretivas: ngStyle
+
+- [vídeo Aula](https://youtu.be/WBf5sgByOY4)
 # 08. Operador Elvis
 # 09. ng-content
 # 10. Criando uma diretiva de atributo: ElementRef e Renderer
 # 11. Diretivas: HostListener e HostBinding
 # 12. Diretivas: Input e Property Binding
 # 13. Criando uma diretiva de estrutura (ngElse)
+
+
