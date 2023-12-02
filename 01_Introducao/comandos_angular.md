@@ -142,4 +142,5 @@
 - Caso precisse, pode colocar na mão da seguinte maneira
 	- @import '~boostrap/dist/css/boostrap.min.css'
 	- ~ o til pega da pasta do node modules.
-- 
+- npm install --save bootstrap-icons
+	- Adicionem em src/styles.css: @import '~bootstrap-icons/font/bootstrap-icons.css'

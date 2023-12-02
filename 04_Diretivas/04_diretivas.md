@@ -303,13 +303,112 @@
 		    ></i>
 		  </h1>
 	````
+- Dicas de como instalar o bootstrap
+	- npm install --save bootstrap-icons
+	- Adicionem em src/styles.css: @import '~bootstrap-icons/font/bootstrap-icons.css'
 
 # 07. Diretivas: ngStyle
 
 - [vídeo Aula](https://youtu.be/WBf5sgByOY4)
+- Diretiva Estrutural, parecida com a ngClass
+- Criamos o componente
+	- ng g c diretiva-ngclass
+- Fizemos uma classe para pegar e alter os atributos como cores e fundo de um botão.
+- Também adicionamos um campo texto onde ao alterarmos o valor número o erro acabe ocorrendo. 
+- Antes de continuarmos, para utilizarmos o ngModel, temos que realizar os passos abaixo:
+	- Dentro do app.module
+		- import { FormsModule } from '@angular/forms';
+		- @NgModule{
+			FormsModule
+		}
+- 
+
+- A ideia de aplicar o stylo diretamente no botao.
+	````html
+		<h5>Styles com property binding (style binding)</h5>
+		<button
+		  [style.backgroundColor]="ativo ? 'blue' : 'gray'"
+		  [style.color]="ativo ? 'gray' : 'green'"
+		  [style.fontWeight]="ativo ? 'bold' : 'normal'"
+		  [style.fontSize]="tamanhoFonte + 'px'"
+		  (click)="mudarAtivo()"
+		>
+		Mudar atributo 'ativo'
+		</button>
+		<br>
+		<input type="text" [(ngModel)]="tamanhoFonte">	
+	````
+- ngstyle entra para melhorar a maneira de aplicar o stilo
+	````html
+		<h5>Styles com diretiva ngStyle</h5>
+		<button
+		  [ngStyle]="{
+		    'backgroundColor': (ativo ? 'blue' : 'gray'),
+		    'color': (ativo ? 'white' : 'black'),
+		    'fontWeight': (ativo ? 'bold' : 'normal'),
+		    'fontSize': tamanhoFonte + 'px'
+		  }"
+		  (click)="mudarAtivo()"
+		>
+		Mudar atributo 'ativo'
+		</button>
+	````
+	- É uma alternativa diferente, neste estilo, ficando mais legivel nos vairos estilos.
+- Pode utilizar o que achar melhor.
+
 # 08. Operador Elvis
+
+- [Vídeo Aula](https://youtu.be/z2GUOnkGCdc)
+- Maneira de fazer uma navegação segura entre objetos
+	- ng g c operador-elvis
+- Nao pode ler um valor de um objetuo null
+	- Como resolver um problem neste sentido
+- Na aula o exemplo executado não deu muito certo. Vou ter que buscar mais conhecimento sobre o operador elvis.
+
+
 # 09. ng-content
+- [Vídeo Aula](https://youtu.be/fud-ezN6RJo)
+- Utilizar o ngContent
+- Criar o componente
+	- ng g c exemplo-ng-content
+- A ideia é abrir um componente dentro de outro compmponente.
+- Com estes seletores, conseguimos colocar de forma mais precisa onde os mesmos vão aparecer.
+	- app.component
+	````html
+	
+	<app-exemplo-ng-content>
+		    Conteúdo passado para o componente.
+		    <app-operador-elvis></app-operador-elvis>
+		</app-exemplo-ng-content>
+
+		<app-exemplo-ng-content>
+		    <div class="titulo">Título do Painel</div>
+		    <div class="corpo">
+		        Conteúdo passado para o componente.
+		    </div>
+		    <div class="corpo">
+		        Conteúdo passado para o componente 2.
+		    </div>
+		</app-exemplo-ng-content>
+
+	````
+	- exemplo-ng-content
+	````html		
+		<div class="panel panel-default">
+		    <div class="panel-heading">
+		      <ng-content select=".titulo"></ng-content>
+		    </div>
+		    <div class="panel-body">
+		      <ng-content select=".corpo"></ng-content>
+		    </div>
+		  </div>
+	````
+- Seletores iguais, o angular concatena.
+
 # 10. Criando uma diretiva de atributo: ElementRef e Renderer
+
+- [Vídeo Aula](https://youtu.be/fud-ezN6RJo)
+
 # 11. Diretivas: HostListener e HostBinding
 # 12. Diretivas: Input e Property Binding
 # 13. Criando uma diretiva de estrutura (ngElse)
