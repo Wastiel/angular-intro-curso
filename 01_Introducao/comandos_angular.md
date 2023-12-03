@@ -144,3 +144,8 @@
 	- ~ o til pega da pasta do node modules.
 - npm install --save bootstrap-icons
 	- Adicionem em src/styles.css: @import '~bootstrap-icons/font/bootstrap-icons.css'
+
+- Criando diertiva
+	- Sempre dentro de uma pasta compartilhada
+	- Shared
+	- ng g d shared/highligth-mouse

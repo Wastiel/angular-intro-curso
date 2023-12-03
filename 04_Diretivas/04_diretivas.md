@@ -408,9 +408,445 @@
 # 10. Criando uma diretiva de atributo: ElementRef e Renderer
 
 - [Vídeo Aula](https://youtu.be/fud-ezN6RJo)
+- Atributos customizadas
+- ElementRef
+	- Referencia do DOM
+- Render
+	-  Manipulação no DOM
+- Vamos criar uma diretiva.
+	- Componente sem template.
+- Dois tipos de diretivas
+	- Diretivas estruturais
+		- ngFor, NgIF, nGSwitch
+	- Diretivas de atributos
+		- ngClass, ngStyle
+- Comando para criar a diretiva
+	- ng g d shared/fundo-amarelo
+- Diretiva vai ser compartilhada por toda a plicação
+	- diretorio shared é compartilhado por toda a plicação. Criamos la dentro.
+- Seletor como conchetes
+	````typeScript
+		@Directive({
+	  		selector: '[appFundoAmarelo]'
+		})
+	````
+- Criamos também um componente para podermos continuar com o exemplo
+	- ng g c diretiva-customizada
+- Colocamos os pingos nos i's
+	- componente no app.componente.html
+	- E identificamos o mesmo para sabermos o que fazer
+- Pelo Inspecionar, conseguimos ver que o fundo amarelo está dentro da diretiva.
+- Para realizarmos esta modificaçãoe deixarmos o fundo amarelo, poderiamos faze assim:
+	````html
+		<p fundoAmarelo style="background-color: yellow;">
+		    Texto com fundo amarelo
+		</p>
+	````
+	- Mas a idéia é utilizarmos via diretiva
+
+- A propriedade para acesssarmos
+	- nativeElement
+	- O Chrome da o caminho para setarmos
+		- .nativeElement.style.backgroundColor
+	- Sempre que nao souber o que quer modificar. 
+		- Faz o console log para descobrir
+	- Setmaos conforme abaixo, para ajustar o texto
+		````typescript
+			/* eslint-disable @angular-eslint/directive-selector */
+			/* eslint-disable @typescript-eslint/no-empty-function */
+			import { Directive, ElementRef } from '@angular/core';
+
+			@Directive({
+			  selector: '[fundoAmarelo]'
+			})
+			export class FundoAmareloDirective {
+
+			  constructor(private _elementRef:ElementRef) {
+			    console.log(this._elementRef);
+			    this._elementRef.nativeElement.style.backgroundColor = 'yellow';
+			   }
+
+			}
+
+		````
+- Podemos colocar em um botão amarelo
+	````html
+		<p fundoAmarelo>
+		    Texto com fundo amarelo
+		</p>
+
+		<button fundoAmarelo> Botao com fundo amarelo</button>
+	````
+- Se quisermos aplicar somente a uma tag
+	- Seguimos o exemplo abaixo, setando somente no paragrafo
+		````typeScript
+			/* eslint-disable @angular-eslint/directive-selector */
+			/* eslint-disable @typescript-eslint/no-empty-function */
+			import { Directive, ElementRef } from '@angular/core';
+
+			@Directive({
+			  selector: 'p[fundoAmarelo]'
+			})
+			export class FundoAmareloDirective {
+
+			  constructor(private _elementRef:ElementRef) {
+			    console.log(this._elementRef);
+			    this._elementRef.nativeElement.style.backgroundColor = 'yellow';
+			   }
+
+			}
+
+		````
+		- Colocamos na frente do seletor
+		````typeScript
+			@Directive({
+  			selector: 'button[fundoAmarelo]'
+			})
+		````
+- Na documentação, não é recomendado que façamos o acesso direto, assim gerando a possíbilidade ataques crossScript
+	````export class FundoAmareloDirective {
+		  constructor(private _elementRef:ElementRef) {
+		    //console.log(this._elementRef);
+		    //this._elementRef.nativeElement.style.backgroundColor = 'yellow';
+		   }
+	````
+- O correto é utilizar o Renderer, renderizador
+	- Responsavel por modificar o Dom
+	- Abaixo, como ficaria a o código com o Renderer
+		````typeScript
+		import { Directive, ElementRef, Renderer2 } from '@angular/core';
+		@Directive({
+		  selector: '[fundoAmarelo]'
+		})
+		export class FundoAmareloDirective {
+
+		  constructor(private _elementRef:ElementRef,
+		    private _renderer:Renderer2,
+		    ) {
+		    //console.log(this._elementRef);
+		    //this._elementRef.nativeElement.style.backgroundColor = 'yellow';
+		    this._renderer.setStyle(_elementRef.nativeElement, 'background-color', 'yellow');
+		   }
+
+		}
+		````
+		- Na forma de uso, vemos que usamos o renderere, para então setarmos o stylo na propriedade
+			````typeScript
+				(_elementRef.nativeElement, 'background-color', 'yellow')
+			````
+		- Analisando, são 3 elementos
+- O render é o formato seguro para a utilização. 
+
 
 # 11. Diretivas: HostListener e HostBinding
+
+- [Vídeo Aula](https://youtu.be/PUxHzEUDVG4)
+- Diretivas customizadas
+	- HostListener 
+	- HostBinding
+- Criamos a diretiva
+	- ng g d shared/highligth-mouse
+- Dica: Nome parecido com diretiva, fica mais facil de trabalharmos com ele e encontrarmos ele.
+- Escutar um evento dentro da diretiva
+	- Com o HostListner
+	- Ele é um Metadado
+- Criamos um metadado para escutar o evento e fazer algo, conforme a ação.
+- Criamos o seguinte exemplo de código para o determinado funcionamento:
+	````typeScript
+	import { Directive, HostListener, ElementRef, Renderer2 } from '@angular/core';
+
+		@Directive({
+		  selector: '[highligthMouse]'
+		})
+		export class HighligthMouseDirective {
+
+		  @HostListener('mouseenter') onMouseOver(){
+		    this._renderer.setStyle(this._ElementRef.nativeElement, 'background-color', 'yellow');
+		  }
+
+		  @HostListener('mouseleave') onMouseLeave(){
+		    this._renderer.setStyle(this._ElementRef.nativeElement, 'background-color', 'white');
+		  }
+
+		  constructor(private _ElementRef: ElementRef,
+		    private _renderer: Renderer2
+		    ) { }
+
+		}
+	````
+	- No código a cima, criamos duas hostlistner, para ouvir o que vai ocorrer com determinada ação.
+		- Ação de passar o mouse por cima
+			- Fundo fica amarelo
+		- Ação de passar o mouse por baixo
+			- Fundo fica branco
+- Existe um método melhor de fazer o que propomos na parte anterior
+	- HostBinding
+	- Permite que façamos a ligação a associação de um atributo para um atributo do nosso elmeento html
+	- Criamos da seguinte maneira:
+		````typeScript
+			import { Directive, HostListener, HostBinding, ElementRef, Renderer2 } from '@angular/core';
+
+			@Directive({
+			  selector: '[highligthMouse]'
+			})
+			export class HighligthMouseDirective {
+
+			  @HostListener('mouseenter') onMouseOver(){
+			    //this._renderer.setStyle(this._ElementRef.nativeElement, 'background-color', 'yellow');
+			    this.backgroundColor = 'yellow';
+			  }
+
+			  @HostListener('mouseleave') onMouseLeave(){
+			    //this._renderer.setStyle(this._ElementRef.nativeElement, 'background-color', 'white');
+			    this.backgroundColor = 'white';
+			  }
+
+			  @HostBinding('style.backgroundColor')
+			  backgroundColor!: string;
+
+			  constructor(
+			    
+			    //private _ElementRef: ElementRef,
+			    //private _renderer: Renderer2
+			    ) { }
+
+			}
+		````
+	- Temos dois funcionamentos diferentes que fazem a mesma coisa. Porém o código fica mais organizado.
+- HostListener
+	- Escutando o evento no hospedeiro da diretiva
+- HostBinding
+	- Permite que façamos no binding a associação do atributo em uma classedo html ou uma variavel
+- Podemos utilizar também os métodos setColor e getColor
+	````typeScript
+		/* eslint-disable @typescript-eslint/no-empty-function */
+		/* eslint-disable @angular-eslint/directive-selector */
+		import { Directive, HostListener, HostBinding, ElementRef, Renderer2 } from '@angular/core';
+
+		@Directive({
+		  selector: '[highligthMouse]'
+		})
+		export class HighligthMouseDirective {
+
+		  @HostListener('mouseenter') onMouseOver(){
+		    //this._renderer.setStyle(this._ElementRef.nativeElement, 'background-color', 'yellow');
+		    this.backgroundColor = 'yellow';
+		  }
+
+		  @HostListener('mouseleave') onMouseLeave(){
+		    //this._renderer.setStyle(this._ElementRef.nativeElement, 'background-color', 'white');
+		    this.backgroundColor = 'white';
+		  }
+
+		  //@HostBinding('style.backgroundColor') backgroundColor!: string;
+		  @HostBinding('style.backgroundColor') get setColor(){
+		    return this.backgroundColor;
+		  }
+
+		  private backgroundColor!: string;
+
+		  constructor(    
+		    //private _ElementRef: ElementRef,
+		    //private _renderer: Renderer2
+		    ) { }
+
+		}
+	````
+
+
 # 12. Diretivas: Input e Property Binding
+
+- [Vídeo Aula](https://youtu.be/rB3OjMOel3s)
+- Criamos uma diretiva
+	- ng g d share/highlitgh
+- Ajustamos a nossa tela highligth mouse, para agilizarmos
+	````typeScript
+		/* eslint-disable @typescript-eslint/no-empty-function */
+		/* eslint-disable @angular-eslint/directive-selector */
+		import { Directive, HostListener, HostBinding, ElementRef, Renderer2 } from '@angular/core';
+
+		@Directive({
+		  selector: '[hitgligth]'
+		})
+		export class HitgligthDirective {
+		  
+		  @HostListener('mouseenter') onMouseOver(){  
+		    this.backgroundColor = 'yellow';
+		  }
+
+		  @HostListener('mouseleave') onMouseLeave(){
+		    this.backgroundColor = 'white';
+		  }
+
+		  @HostBinding('style.backgroundColor') backgroundColor!: string;
+		  
+		  constructor(    
+		    //private _ElementRef: ElementRef,
+		    //private _renderer: Renderer2
+		    ) { }
+
+
+		}
+
+	````
+- A nossa ideia desta aula, é fazer uma customização na definição de cores.
+- Vamos criar duas variaveis.
+- ngOnInit ()
+	- utilizamos quando o componente é inicializado
+	- setamos um defaultcolor no processo
+	- Se declararmos da maneira abaixo, o angular entende que o mesmo é uma diretiva e um seletor
+		````typescript
+		@Input('highlitght') highligthColor: string = 'yellow';
+		````
+- Abaixo como a nossa classe ficou
+	````typeScript
+		/* eslint-disable @typescript-eslint/no-empty-function */
+		/* eslint-disable @typescript-eslint/no-inferrable-types */
+		/* eslint-disable @angular-eslint/directive-selector */
+		import { Directive, HostListener, HostBinding,
+		  Input } from '@angular/core';
+
+		@Directive({
+		  selector: '[highlight]'
+		})
+		export class HighlightDirective {
+
+		  @HostListener('mouseenter') onMouseOver(){
+		      this.backgroundColor = this.highlightColor;
+		  }
+
+		  @HostListener('mouseleave') onMouseLeave(){
+		      this.backgroundColor = this.defaultColor;
+		  }
+
+		  @HostBinding('style.backgroundColor') backgroundColor!: string;
+
+		  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+		  @Input() defaultColor: string = 'white';
+		  @Input('highlight') highlightColor: string = 'yellow';
+
+		  constructor() { }
+
+		  ngOnInit(){
+		    this.backgroundColor = this.defaultColor;
+		  }
+
+		}
+	````
+- diretiva html
+	````html
+		 <p fundoAmarelo >
+    		Texto com fundo amarelo.
+		  </p>
+		  
+		  <button fundoAmarelo>Botão com fundo amarelo.</button>
+		  
+		  <p highligthMouse>
+		    Texto com highlight quando passo o mousee.
+		  </p>
+
+		  <p highlight="blue" defaultColor="grey">
+		    Texto com highlight com cores customizadas.
+		  </p>
+	````
+
+
 # 13. Criando uma diretiva de estrutura (ngElse)
 
+- [Vídeo Aula](https://youtu.be/b-rRPCK-fdE)
+- Diretiva de estrutura customizada
+- Criamos a diretiva ng-else
+	- ng g d shared/ng-else
+- Diretiva de estrutura
+	- ngIf é uma proprety binding
+- Configuramos uma lógica para poder tratar os elementos em tela, simulando um ngelse
+	````typescript
+		/* eslint-disable @angular-eslint/directive-selector */
+		import { Directive, Input,
+		  TemplateRef, ViewContainerRef } from '@angular/core';
+
+		@Directive({
+		  selector: '[ngElse]'
+		})
+		export class NgElseDirective {
+
+		  @Input() set ngElse(condition: boolean){
+		    if (!condition){
+		      this._viewContainerRef.createEmbeddedView(this._templateRef);
+		    } else {
+		      this._viewContainerRef.clear();
+		    }
+		  }
+
+		  constructor(
+		    private _templateRef: TemplateRef<any>,
+		    private _viewContainerRef: ViewContainerRef
+		  ) { }
+
+}
+	````
+	````html
+		<p fundoAmarelo >
+		    Texto com fundo amarelo.
+		  </p>
+		  
+		  <button fundoAmarelo>Botão com fundo amarelo.</button>
+		  
+		  <p highligthMouse>
+		    Texto com highlight quando passo o mousee.
+		  </p>
+
+		  <p highlight="blue" defaultColor="grey">
+		    Texto com highlight com cores customizadas.
+		  </p>
+
+		  <h5>Diretiva Estrutura customizada - ngElse</h5>
+
+		<div *ngIf="mostrarCursos" >
+		  Lista de cursos aqui.
+		</div>
+		<div *ngElse="mostrarCursos" >
+		  Não existem cursos para serem listados.
+		</div>
+
+		<br>
+		<button (click)="onMostrarCursos()">
+		  Mostrar ou esconder cursos
+		</button>
+		<br>
+
+		<!-- Para Angular v4+, usar <ng-template></ng-template> no lugar de <template></template> -->
+		<ng-template [ngElse]="mostrarCursos">
+		  <div>
+		    Não existem cursos para serem listados.
+		  </div>
+		</ng-template>
+	````
+	````typescript
+	/* eslint-disable @angular-eslint/no-empty-lifecycle-method */
+	/* eslint-disable @typescript-eslint/no-empty-function */
+	/* eslint-disable @typescript-eslint/no-inferrable-types */
+	import { Component, OnInit } from '@angular/core';
+
+	@Component({
+	  selector: 'app-diretiva-customizada',
+	  templateUrl: './diretiva-customizada.component.html',
+	  styleUrls: ['./diretiva-customizada.component.css']
+	})
+	export class DiretivaCustomizadaComponent implements OnInit{
+
+	  mostrarCursos: boolean = false;
+
+	  constructor() { }
+
+	  ngOnInit() {
+	  }
+
+	  onMostrarCursos(){
+	    this.mostrarCursos = !this.mostrarCursos;
+	  }
+
+
+	}
+	````
 
