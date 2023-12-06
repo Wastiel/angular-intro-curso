@@ -149,3 +149,6 @@
 	- Sempre dentro de uma pasta compartilhada
 	- Shared
 	- ng g d shared/highligth-mouse
+- Criando um serviço
+	- ng g s shared/log
+	- s de service
