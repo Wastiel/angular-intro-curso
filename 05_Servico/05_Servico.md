@@ -318,4 +318,160 @@
 
 # 05. Comunicação entre componentes usando serviços (broadcast de eventos)
 
+- [Vídeo Aula](https://youtu.be/R9afVKty3Dg)
+- Para componentes se comunicar
+	- Input propreties
+	- Ouptput propreties
+- A maneira que vamos utilizar aqui é o componente para componente, excluindo a ideia de pai e filho
+- Adicionamos na nossa classe de serviço algo para ouvir um evento
+	- EventEmitter
+- Ajustamos o curso componente, para ficar ouvindo o que estamos digitando
+- Criamos um novo componente
+	- ng g c receber-curso-criado
+- Depois de criarmos o componente, nao queremos que o nosso appmodle tenha o mesmo inicializado
+- Retiramos a nossa injeção e adicionamos no criar-curso.module
+	- ReceberCursoCriadoComponent
+- Chamaos o seletor do receber curso criado dentro do nosso cirar curso
+	- <app-receber-curso-criado></app-receber-curso-criado>
+- Injetamos o serviço dentro do componente criado
+	````typeScript
+		export class ReceberCursoCriadoComponent {
+
+		  constructor(private cursoService: CursosService){}
+
+		}
+	````
+- Fizemos um ajuste para o receber curso criado
+	- Ajustamos o HTMl para mostrar o ultimo curso criado
+		````html
+		<p *ngIf="curso">
+		    O Ultimo curso criado fi: {{ curso }}
+		</p>
+
+		````
+	- Também fizemos um ajuste na nossa classe typeScript
+		````typeScript
+			export class ReceberCursoCriadoComponent implements OnInit {
+
+			  curso!: string;
+			  
+
+			  constructor(private cursosService: CursosService){}
+
+			  ngOnInit(){
+			    this.cursosService.emitirCursosCriado.subscribe(
+			      cursoCriado=> this.curso = cursoCriado
+			    )
+			  }
+
+			}
+		````
+- Com isto temos a emissão de um componente para outro componente
+- Criamos um metodo static, nao precisamos da instancia da classe para acessar o mesmo
+	- Diferente do acesso ao mesmo
+- Com o static, nao precisamos injetar nada no código
+
 # 06. Injetando um serviço em outro serviço
+
+- [Vídeo Aula](https://youtu.be/hMhCDO75Aus)
+- Injetar um serviço em outro serviço.
+- Criar um serviço com angular CLI
+	- ng g s shared/log
+- Posterior precisamos adicionar este serviço ao nosso app.Module (Não faz sozinho), com escopo gobal
+	````typeScript
+		import { NgModule } from '@angular/core';
+		import { BrowserModule } from '@angular/platform-browser';
+
+		import { AppRoutingModule } from './app-routing.module';
+		import { AppComponent } from './app.component';
+		import { CursosModule } from './cursos/cursos.module';
+		import { CursosService } from './cursos/cursos.service';
+		import { CriarCursoModule } from './criar-curso/criar-curso.module';
+		import { LogService } from './shared/log.service';
+
+
+
+		@NgModule({
+		  declarations: [
+		    AppComponent,        
+		  ],
+		  imports: [
+		    BrowserModule,
+		    AppRoutingModule,
+		    CriarCursoModule,
+		    CursosModule    
+		  ],
+		  providers: [
+		    CursosService,
+		    LogService
+		  ],
+		  bootstrap: [AppComponent]
+		})
+		export class AppModule { }
+
+	````
+- Como injetar este serviço na nossa classe do curso service
+	- vamos na classe de serviço desejada
+	````typeScript
+		import { EventEmitter, Injectable } from "@angular/core";
+
+		import { LogService } from "../shared/log.service";
+
+		@Injectable()
+		export class CursosService{
+
+		    emitirCursosCriado = new EventEmitter<string>();
+		    static criouNovoCurso = new EventEmitter<string>();
+
+		    private cursos: string[] = ['Angular 2', 'Java', 'Phonegap'];
+
+		    constructor(private logService: LogService){
+		        console.log('CruosService');
+		    }
+
+		    getCursos(){
+		        return this.cursos;
+		    }
+
+		    addCurso(curso: string){
+		        this.cursos.push(curso);
+		        this.emitirCursosCriado.emit(curso);
+		        CursosService.criouNovoCurso.emit(curso);
+		    }
+
+		}
+	```` 
+- Validamos via ngserve se deu tudo certo e depois podemos começar a utilizar a nossa classe de serviço.
+- Ajustamos o nosso curso service, injetando o determinado servico:
+	````typeScript
+		import { EventEmitter, Injectable } from "@angular/core";
+
+		import { LogService } from "../shared/log.service";
+
+		@Injectable()
+		export class CursosService{
+
+		    emitirCursosCriado = new EventEmitter<string>();
+		    static criouNovoCurso = new EventEmitter<string>();
+
+		    private cursos: string[] = ['Angular 2', 'Java', 'Phonegap'];
+
+		    constructor(private logService: LogService){
+		        console.log('CruosService');
+		    }
+
+		    getCursos(){
+		        this.logService.consoleLog('obtendo lista de cursos');
+		        return this.cursos;
+		    }
+
+		    addCurso(curso: string){
+		        this.logService.consoleLog(`criando um novo curso ${curso}`);
+		        this.cursos.push(curso);
+		        this.emitirCursosCriado.emit(curso);
+		        CursosService.criouNovoCurso.emit(curso);
+		    }
+
+		}
+	````
+- Com isto conseguimos injetar um serviço dentro de outro serviço.
