@@ -236,3 +236,5 @@
 # 05. Pipes: Criando um Pipe Impuro
 
 # 06. Pipes: Async (Assíncrono)
+
+teste
