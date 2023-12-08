@@ -152,3 +152,5 @@
 - Criando um serviço
 	- ng g s shared/log
 	- s de service
+- Criando pipe com o Angular
+	- ng g p camel-case
