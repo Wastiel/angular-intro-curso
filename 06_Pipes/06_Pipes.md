@@ -71,8 +71,6 @@
 - Todos os pipes estão imbutidos dentro do CommonModule
 
 
-
-
 # 02. Criando um Pipe
 
 - [Vídeo Aula](https://youtu.be/KO7dVbigKvI)
@@ -229,12 +227,90 @@
 - O que é um pipe puro?
 	- Não olhas as modificações num galor que é passado como parametro.
 	- Não olhas as modificações no objeto.
-	- 
-
 
 
 # 05. Pipes: Criando um Pipe Impuro
 
+- [Vídeo Aula](https://youtu.be/Qn54Z3wbU2E)
+- Pipe Impuro
+- Aula Anterior, mesmo adicionando um novo valor no array nao atualizava.
+- ng g p filtro-array-impuro
+- Vamos utilizar herança do typeScript
+- Para não repetirmos a lógica, utilizamos a importação do pipe puro como herança no pipe impuro.
+	````typeScript
+			import { Pipe, PipeTransform } from '@angular/core';
+
+			import { FiltroArrayPipe } from './filtro-array.pipe';
+
+			@Pipe({
+			  name: 'filtroArrayImpuro',
+			  pure: false
+			})
+			export class FiltroArrayImpuroPipe extends FiltroArrayPipe {
+
+			  
+
+			}
+	````
+	- O que o torna impuro é o parametro "pure: false"
+	- Criamos for para mostrar em tela	
+	````html
+			<h5>Pipe Impuro</h5>
+
+			<ul>
+			    <li *ngFor="let liv of livros | filtroArrayImpuro:filtro">
+			    {{ liv }}
+			    </li>
+			</ul>
+	````
+- Agora ao testarmos, deixamos o campo pesquisa, adicionamos um novo array, automaticamente o nosso pipe impuro adicionao no for as informações a mais.
+- Nunca usar os pipes impuros e puro em produção.
+
+- Como fazemos em um projeto real
+- Faça via metodo, não faça via filtro ou order by
+	- Arquivo typeScript
+		````typescript
+			obterCursos(){
+
+				    if(this.livros.length === 0 || this.filtro === undefined || this.filtro.trim() === ''){
+				      return this.livros;
+				    }   
+
+				    return this.livros.filter(v => v.toLocaleLowerCase().includes(this.filtro.toLocaleLowerCase())
+				   );     
+				   
+				  }
+		````
+		````html
+				<h5>Maneira correta de usar filtro nos projetos</h5>
+
+				<ul>
+				    <li *ngFor="let liv of obterCursos()">
+				    {{ liv }}
+				    </li>
+				</ul>
+		````
+
 # 06. Pipes: Async (Assíncrono)
 
-teste
+- [Vídeo Aula](https://youtu.be/WhcK7QOL6YA)
+- Pype Assyncrono
+	- Saida de um valor para sair no template, mesmo quando o valor demore um pouco.
+- Fizemos os seguintes fluxos e ajustes:
+	````HTML
+		<p> {{ valorAsync | async }}</p>
+
+		<p> {{ valorAsync2 | async }}</p>
+	````
+	````typescript
+			  // vai atribuir o valor assincrono a variavel async depois de 2 segundos.
+			  valorAsync = new Promise((resolve, reject) => {
+			    setTimeout(() => resolve('Valor assíncrono'), 2000);
+			  });
+
+			  valorAsync2 = interval(2000)
+			  .pipe(
+			    map(valor => 'Valor assíncrono 2')
+			  );
+	````
+- A ideia aqui é mostrar valores posterior a um determinado tempo. 
