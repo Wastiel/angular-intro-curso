@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { interval, map } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-exemplos-pipes',
@@ -25,5 +27,25 @@ export class ExemplosPipesComponent {
     console.log(this.livros);
   }
 
+  obterCursos(){
+
+    if(this.livros.length === 0 || this.filtro === undefined || this.filtro.trim() === ''){
+      return this.livros;
+    }   
+
+    return this.livros.filter(v => v.toLocaleLowerCase().includes(this.filtro.toLocaleLowerCase())
+   );     
+   
+  }
+
+  // vai atribuir o valor assincrono a variavel async depois de 2 segundos.
+  valorAsync = new Promise((resolve, reject) => {
+    setTimeout(() => resolve('Valor assíncrono'), 2000);
+  });
+
+  valorAsync2 = interval(2000)
+  .pipe(
+    map(valor => 'Valor assíncrono 2')
+  );
 
 }
