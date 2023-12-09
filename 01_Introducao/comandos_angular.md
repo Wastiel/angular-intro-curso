@@ -154,3 +154,22 @@
 	- s de service
 - Criando pipe com o Angular
 	- ng g p camel-case
+- Instalar o materialize
+	- npm install materialize-css@next
+	````typeScript
+	// dentro do arquivo angular.json
+		"styles": [
+		  "node_modules/materialize-css/dist/css/materialize.css",
+		  "src/styles.css"
+		],
+		"scripts": [
+		  "node_modules/materialize-css/dist/js/materialize.js"
+		]
+	````
+	````html
+	// Exemplo de uso
+		<button class="btn waves-effect waves-light" type="button" name="action">Clique-me
+		  <i class="material-icons right">send</i>
+		</button>
+	````
+- 
