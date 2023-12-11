@@ -206,14 +206,269 @@
 		````
 
 # 06. Rotas: Escutando mudanças nos parâmetros de roteamento
-- [Vídeo Aula](https://youtu.be/a6PjrYAPrGs)
 
+- [Vídeo Aula](https://youtu.be/a6PjrYAPrGs)
+- Vamos aprender a escutar mudanças nos parametros de roteamento.
+- Uma maneira mais elegante de trabalharmos como pegar o nosso ID
+- Analisamos os parametros do http
+- Fizemos um ajuste tanto em ngOnInit quando ngOnDestroy
+	````typeScript
+		export class CursoDetalheComponent implements OnInit{
+
+		  id!: string;
+		  inscircao!: Subscription
+		  //idCourseValue:string = '';
+
+		  //rota ativa, podemos injetar no construtuor os detalhes da rota
+
+		  constructor(private route: ActivatedRoute){
+		    //console.log(this.route);
+		    //this.id = this.route.snapshot.params['id'];
+		  }
+
+		  ngOnInit(){
+
+		    this.inscircao = this.route.params.subscribe(
+		      (params: any) =>{
+		        this.id = params ['id'];
+		      }        
+		      );
+		  }
+
+		  ngOnDestroy(){
+		    this.inscircao.unsubscribe();
+		        
+		  }
+
+		}
+	````
+- Com isto agora, ao atualizarmos o nosso ID a rota acaba por se tualizar também.
+- Também encerramos a rota apó o componente for destruido.
 
 # 07. Rotas Imperativas: Redirecionamento via código
-- [Vídeo Aula]()
 
+- [Vídeo Aula](https://youtu.be/SRtM9nV_7nw)
+- Vamos via Serviço, Exemplo mais completo. 
+- Ao clicarmos em um curso, vamos redirecionar a rota para o curso. 
+- Se o curso existe, mostramos na tela os detalhes do curso, se não direcionaoms para um outro local (Curso não encontrado)
+- Criamos o serviço
+	- ng g s cursos/cursos
+- Vamos colocar o curso service dentro do providers
+	````typeScript
+		import { CursosService } from './cursos/cursos.service';
+
+		@NgModule({
+		  ....
+		  providers: [CursosService],
+		  ....
+	````
+- Adicionamos o curso service dentro do nosso componente para podermos utilizalo.
+	````typescript
+		 constructor(private cursosService: CursosService){
+    
+  		}
+	````
+- Criamos um objeto no curso servie, para podermos trabalhar com o proposto
+	````typeScript
+		getCursos(){
+	    return[
+	      {id: 1, nome: 'Angular 2'},
+	      {id: 2, nome: 'Java'}
+	    ]
+	  }
+	````
+	````typeScript
+		//Atribuimos o determinado array
+		  cursos!: any[];
+  
+		  constructor(private cursosService: CursosService){
+		  }
+
+		  ngOnInit(){
+		    this.cursos = this.cursosService.getCursos();
+		  }
+
+	````
+- Adicionamos o seguinte componente do CSS, para carregar os cursos que temos na nossa base.
+	- Com os ajustes abaixo, conseguimos direcionar para as páginas do curso.
+	````html
+		<div class="collection">
+		    <a class="collection-item"
+		    *ngFor="let curso of cursos"
+		    [routerLink]="['/cursos', curso.id]">
+		    {{ curso.nome }}</a>    
+		  </div>
+	````
+- Agora vamos ajustar o curso-detalhe.
+	- Fizemos uma validação para o curso component que não encontra a rota
+		````typeScript
+			import { Component, OnInit } from '@angular/core';
+			import { ActivatedRoute, Router } from '@angular/router';
+			import { Subscription } from 'rxjs';
+
+			import { CursosService } from '../cursos/cursos.service';
+
+			@Component({
+			  selector: 'app-curso-detalhe',
+			  templateUrl: './curso-detalhe.component.html',
+			  styleUrls: ['./curso-detalhe.component.css']
+			})
+			export class CursoDetalheComponent implements OnInit{
+			  
+
+			  id!: number;
+			  inscircao!: Subscription;
+			  curso: any;
+			  //idCourseValue:string = '';
+
+			  //rota ativa, podemos injetar no construtuor os detalhes da rota
+
+			  constructor(private route: ActivatedRoute,
+			    private cursosService: CursosService,
+			    private router: Router
+			    ){
+			    //console.log(this.route);
+			    //this.id = this.route.snapshot.params['id'];
+			  }
+
+			  ngOnInit(){
+
+			    this.inscircao = this.route.params.subscribe(
+			      (params: any) =>{
+			        this.id = params ['id'];
+			        this.curso = this.cursosService.getCurso(this.id);
+
+			        if (this.curso == null){
+			          this.router.navigate(['/naoEncontrado']);
+			        }
+			      }        
+			      );
+			  }
+
+			  ngOnDestroy(){
+			    this.inscircao.unsubscribe();
+			        
+			  }
+
+			}
+
+		````
+- Posterior criamos um componente para avaliar mostra a nao rota
+	- ng g c curso-nao-encontrado
+- Posterior Configuramos a rota do componente, para então poodermos direcionar:
+	````typeScript
+		const routes: Routes = [
+		  { path: 'cursos', component: CursosComponent},
+		  { path: 'cursos/:id', component: CursoDetalheComponent},
+		  { path: 'naoEncontrado', component: CursoNaoEncontradoComponent},
+		  { path: 'login', component: LoginComponent},
+		  { path: '', component: HomeComponent}
+		];
+	````
+- Regra do curso component que direciona para a rota de não encontrado
+	````typeScript
+		if (this.curso == null){
+			          this.router.navigate(['/naoEncontrado']);
+			        }
+	````
+
+	
 # 08. Rotas: Definindo e extraindo parâmetros de URL (query)
-- [Vídeo Aula]()
+
+- [Vídeo Aula](https://youtu.be/B7mc184O4x0)
+- Definir e extrair parametros de URL
+- Lista de cursos e temos vários cursos, onde queremos mostrar os primeiros 50 cursos
+- Parametro query
+	- Forma de passar parametros opicionais para o angular 2
+- Como fazemos isto na prática:
+	````html
+		<li routerLinkActive="active"><a routerLink="/cursos" [queryParams]="{pagina:1}">Cursos</a></li>      
+	````
+	- Conseguimos extrar a informação e usala.
+- Vamos criar uma variavel para utilização dentro do fluxo.
+- Primeiro vamos colocar para iniciar uma rota alternativa 
+	````typeScript
+	constructor(
+    private cursosService: CursosService,
+    private route: ActivatedRoute
+    ){
+  }
+  	`````
+ - Para pegarmos o parametro da página
+ 	````typeScript
+ 		    this.cursos = this.cursosService.getCursos();
+		    this.route.queryParams.subscribe(
+		      (queryParams: any) => {
+		        this.pagina = queryParams['pagina'];
+		      }
+		    );
+ 	````
+- queryparams retorna uma inscrição
+- Ajustamos o nosso código fonte da seguinte maneira:
+	````typeScript
+		  ngOnInit(){
+		    this.cursos = this.cursosService.getCursos();
+		    this.insscricao = this.route.queryParams.subscribe(
+		      (queryParams: any) => {
+		        this.pagina = queryParams['pagina'];
+		      }
+		    );
+
+		  }
+		  ngOnDestroy(){
+		    this.insscricao.unsubscribe();
+		  }
+	````
+- Abaixo vemos como mudar um determinado parametro e também uma variavel em tela.
+	````typeScript
+		import { Component, OnInit } from '@angular/core';
+		import { CursosService } from './cursos.service';
+		import { ActivatedRoute, Router } from '@angular/router';
+		import { query } from '@angular/animations';
+		import { Subscription } from 'rxjs';
+
+		@Component({
+		  selector: 'app-cursos',
+		  templateUrl: './cursos.component.html',
+		  styleUrls: ['./cursos.component.css']
+		})
+		export class CursosComponent implements OnInit{
+
+
+		  cursos!: any[];
+		  pagina!: number;
+		  insscricao!: Subscription;
+
+		  constructor(
+		    private cursosService: CursosService,
+		    private route: ActivatedRoute,
+		    private router: Router
+		    ){
+		  }
+
+		  ngOnInit(){
+		    this.cursos = this.cursosService.getCursos();
+		    this.insscricao = this.route.queryParams.subscribe(
+		      (queryParams: any) => {
+		        this.pagina = queryParams['pagina'];
+		      }
+		    );
+
+		  }
+		  ngOnDestroy(){
+		    this.insscricao.unsubscribe();
+		  }
+
+		  proximaPagina(){
+		    //this.pagina++;
+		    this.router.navigate(['/cursos'],
+		    {queryParams: {'pagina': ++this.pagina}}
+		    );
+		  }
+
+		}
+
+	````
 
 # 09. Rotas: Criando um módulo de rotas
 - [Vídeo Aula]()
