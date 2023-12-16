@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { CursosService } from '../cursos/cursos.service';
+import { CursosService } from '../cursos.service';
 
 @Component({
   selector: 'app-curso-detalhe',
@@ -35,7 +35,7 @@ export class CursoDetalheComponent implements OnInit{
         this.curso = this.cursosService.getCurso(this.id);
 
         if (this.curso == null){
-          this.router.navigate(['/naoEncontrado']);
+          this.router.navigate(['cursos/naoEncontrado']);
         }
       }        
       );

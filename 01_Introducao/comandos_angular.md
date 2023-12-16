@@ -172,4 +172,60 @@
 		  <i class="material-icons right">send</i>
 		</button>
 	````
-- 
+- Criou o componente principal ja cria o modulo do determinado componente
+	- Exemplo abaixo:
+	- CommonModule, para termos acesso a ngif ngfor e etc
+		````typeScript
+		import { NgModule } from '@angular/core';
+
+		import { CursosComponent } from './cursos.component';
+		import { CursoDetalheComponent } from './curso-detalhe/curso-detalhe.component';
+		import { CursoNaoEncontradoComponent } from './curso-nao-encontrado/curso-nao-encontrado.component';
+		import { CursosService } from './cursos.service';
+		import { CommonModule } from '@angular/common';
+		import { RouterModule } from '@angular/router';
+
+		@NgModule({
+		  imports: [
+		    CommonModule,
+		    RouterModule
+
+		  ],
+		  exports: [],
+		  declarations:[
+		    CursosComponent,
+		    CursoDetalheComponent,
+		    CursoNaoEncontradoComponent,
+		],
+		  providers: [CursosService],
+		})
+
+		export class CursosModule {}
+		````
+- Assim como rotas
+	- Exemplo abaixo:
+			````typeScript
+		import { ModuleWithProviders, NgModule } from '@angular/core';
+		import { RouterModule, Routes } from '@angular/router';
+
+		import { CursosComponent } from './cursos.component';
+		import { CursoDetalheComponent } from './curso-detalhe/curso-detalhe.component';
+		import { CursoNaoEncontradoComponent } from './curso-nao-encontrado/curso-nao-encontrado.component';
+
+		const cursosRoutes: Routes = [
+		  { path: 'cursos', component: CursosComponent},
+		  { path: 'cursos/:id', component: CursoDetalheComponent},
+		  { path: 'naoEncontrado', component: CursoNaoEncontradoComponent},
+		];
+
+		@NgModule({
+		  imports: [RouterModule.forChild(cursosRoutes)],
+		  exports: [RouterModule]
+		})
+		export class CursosRoutingModule {
+		  //static  routing: ModuleWithProviders<RouterModule> = RouterModule.forRoot(routes);
+		 }
+
+		````
+- Falta colocar aqui como criamo guardas de rotas
+- Snipets
