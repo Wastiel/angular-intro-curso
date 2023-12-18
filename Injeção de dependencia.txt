@@ -1,0 +1,17 @@
+resumo ChatGPT
+
+A injeção de dependência é um conceito usado em programação para ajudar a organizar e estruturar o código de maneira mais flexível e modular. Vamos tentar simplificar isso:
+
+Dependência: Em programação, uma "dependência" refere-se a algo que um pedaço de código precisa para funcionar corretamente. Pode ser uma função, um objeto, ou qualquer outra coisa.
+
+Injeção de Dependência (DI): Em vez de um pedaço de código criar ou buscar suas próprias dependências, a injeção de dependência envolve passar as dependências necessárias para o código de fora. Isso é feito para tornar o código mais flexível, reutilizável e mais fácil de testar.
+
+Exemplo simplificado: Vamos imaginar que você está fazendo um bolo. O bolo é seu código e os ingredientes são as dependências. Em vez de ir pessoalmente à loja (criar ou buscar as dependências), alguém (um mecanismo de injeção de dependência) traz os ingredientes para você.
+
+No contexto da programação, a injeção de dependência é como fornecer as "matérias-primas" necessárias para uma parte do seu código de fora, em vez de deixar essa parte do código se preocupar em criá-las ou buscá-las.
+
+Isso torna o código mais modular porque você pode substituir facilmente as dependências sem mexer muito no código que as utiliza. Além disso, facilita a escrita de testes, pois você pode injetar dependências de teste para isolar e testar partes específicas do seu código.
+
+video: https://www.youtube.com/watch?v=evhskJG1kvY
+
+artigo medium: https://medium.com/@eduardolanfredi/inje%C3%A7%C3%A3o-de-depend%C3%AAncia-ff0372a1672

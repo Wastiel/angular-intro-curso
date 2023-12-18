@@ -15,9 +15,7 @@ export class AlunosDeactivateGuard implements CanDeactivate<IFormCanDeactivate> 
         ): Observable<boolean>|Promise<boolean>|boolean {
 
             console.log('guarda de desativação');
-
-
-            //return true;
+           //return true;
            // return component.podeMudarRota ? component.podeMudarRota() : true;
 
             return component.podeDesativar ? component.podeDesativar() : true;

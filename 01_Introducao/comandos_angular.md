@@ -136,7 +136,26 @@
 	- ng build
 - INstalar um servidor http
 	- npm install http-server -g
-- Instalar Angular
+- Instalar Bootstrap 5 Angular
+	- ng add @ng-bootstrap/ng-bootstrap
+	- npm install jquery@latest
+	- Ajustamos o arquivo angular.json, dentro das tag's script
+		- "node_modules/jquery/dist/jquery.min.js",
+  		- "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"  		
+ 		- Código para teste
+	 	````typeScript
+	  		<div class="dropdown">
+			  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+			    Dropdown button
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+			    <li><a class="dropdown-item" href="#">Action</a></li>
+			    <li><a class="dropdown-item" href="#">Another action</a></li>
+			    <li><a class="dropdown-item" href="#">Something else here</a></li>
+			  </ul>
+			</div>
+	  	````
+	- Jeito Velho e errado
 	- ng add @ng-bootstrap/ng-bootstrap
 	- Documentação - https://valor-software.com/ngx-bootstrap/#/
 - Caso precisse, pode colocar na mão da seguinte maneira
@@ -227,5 +246,77 @@
 		 }
 
 		````
-- Falta colocar aqui como criamo guardas de rotas
-- Snipets
+- Instalar Bootstrap 5 Angular
+	- [Referencia 1](https://loiane.com/2017/08/how-to-add-bootstrap-to-an-angular-cli-project/)
+	- [Referencia 2](https://valor-software.com/ngx-bootstrap/#/)
+	- ng add @ng-bootstrap/ng-bootstrap
+	- npm install jquery@latest
+	- Ajustamos o arquivo angular.json, dentro das tag's script
+		- "node_modules/jquery/dist/jquery.min.js",
+  		- "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"  		
+ 		- Código para teste
+	 	````typeScript
+	  		<div class="dropdown">
+			  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+			    Dropdown button
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+			    <li><a class="dropdown-item" href="#">Action</a></li>
+			    <li><a class="dropdown-item" href="#">Another action</a></li>
+			    <li><a class="dropdown-item" href="#">Something else here</a></li>
+			  </ul>
+			</div>
+	  	````
+	- Instlar o ngx-bootstrap
+		ng add ngx-bootstrap
+		ng add ngx-bootstrap bootstrap --save
+	- Posterior Adicionamos no app.module as importações
+		````typeScript
+			import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+			import { TooltipModule } from 'ngx-bootstrap/tooltip';
+			import { ModalModule } from 'ngx-bootstrap/modal';
+
+			@NgModule({
+			  imports: [
+			    BrowserModule,
+			    BsDropdownModule.forRoot(),
+			    TooltipModule.forRoot(),
+			    ModalModule.forRoot()
+			  ],
+		```` 
+	- Exemplo de dropdown para teste
+		````html
+			<div class="btn-group" dropdown>
+			  <button id="button-basic" dropdownToggle type="button" class="btn btn-primary dropdown-toggle"
+			          aria-controls="dropdown-basic">
+			    Button dropdown <span class="caret"></span>
+			  </button>
+			  <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu"
+			      role="menu" aria-labelledby="button-basic">
+			    <li role="menuitem"><a class="dropdown-item" href="#">Action</a></li>
+			    <li role="menuitem"><a class="dropdown-item" href="#">Another action</a></li>
+			    <li role="menuitem"><a class="dropdown-item" href="#">Something else here</a></li>
+			    <li class="divider dropdown-divider"></li>
+			    <li role="menuitem"><a class="dropdown-item" href="#">Separated link</a>
+			    </li>
+			  </ul>
+			</div>
+		````
+- O nome da tag html. a classe gera o código de forma automática:
+	- isto: div.form-group
+	- Vai gerar isto: <div class="form-group"></div>
+
+- ngform, ngsubmit, ngmodel, pertencem ao FormsModule.
+- Caso tenha um módulo especifico, tem que importar o FormsModule, no módulo no qual estamos trabalhando.
+- Criar um módulo
+	- ng g m template-form
+
+Snipets
+
+- Para criarmos rotas defoults com snipet
+	- a-route-paht-default
+
+
+
+
+ngx-bootstrap

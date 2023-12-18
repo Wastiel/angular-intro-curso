@@ -19,9 +19,7 @@ const alunosRoutes: Routes = [
     { path: ':id/editar', component: AlunosFormComponent,
     canDeactivate: [AlunosDeactivateGuard]
   },
-  ]},
-  
-  
+  ]},   
 ];
 
 @NgModule({
