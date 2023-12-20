@@ -296,7 +296,67 @@
 
 # 07. Forms (template driven) Aplicando CSS na validação dos campos
 
+- [Vídeo Aula](https://youtu.be/9lmUpszp9Vo)
+- Como aplicar CSS na validação dos campos
+- Conseguimos submeter valor, pq nao temos controle.
+- Angular trabalha com algumas classes
+	- Vai aplicar algumas classes, dependendo do estado do controle
+
+| Estado           | Sim         | Não           |
+|------------------|-------------|---------------|
+| Controle Visitado| ng-touched  | ng-untouched  |
+| Valor Mudou      | ng-dirty    | ng-invalid    |
+| Controle Válido  | ng-valid    | ng-invalid    |
+
+- no campo e-mail, aplicou as seguintes classes.
+	- ng-untouched, pq nao tocamos no campo
+	- ng pristine, pq o valor nao mudou
+	- ng valid, pq temos algum dado no mesmo
+- Ao mudarmos o valor do campo, o angular entende e muda as classases do mesmo.
+- Colcamos a seguinte lógica no nosso código fonte:
+	````html
+		<input type="text" class="form-control" name="name" 
+            id="nome" placeholder="Nome" [(ngModel)]="usuario.nome" 
+            required #nome>
+        </div>
+        <div>
+            {{nome.className}}
+        </div>
+	````
+	- Steamos uma variavel nosso input e depois mostramos a className da mesma em tela e temos o seguinte resultado, conforme o fluxo muda:
+	- form-control ng-untouched ng-pristine ng-valid
+- Dentro do nosso CSS, criamos uma regra para quando forem determinadas classes, 
+	```css
+	.ng-invalid.ng-touched:not(form){
+    border: 1px solid red;
+		}	
+	```
+- Com isto quando entramos no campo e não preenchemos nada e saimos do mesmo ele fica vermelho, gerando assim uma sinalização da obrigatoriedade do campo.
+
 # 08. Forms (template driven) Mostrando mensagens de erro de validação
+
+- [Vídeo Aula](https://youtu.be/dTL7SSoZ164)
+- Divs com mensagens de erro para deixar mais amigavel para o nosso usuário
+- Mostrar sinalizações
+	- Tipo, o nome é obrigatório
+	- email obrigatório
+- Podemos utilizar as informações do controle do console, para deixar nossas mensagens de erro mais dinamicas
+- Criamos uma lógica para fazer uma validação simples, mostrando se o campo não está preenchido, mostramos mostramos uma tag <p> se está preenchido não mostramos a tag <p>
+	````html
+        <div *ngIf="!nome.valid && nome.touched">
+            <p>Nome é obrigatório</p>
+        </div>
+	````
+- Podemos adicionar um CSS para sinalizar de melhor maneira o fluxo. 
+- Utilizamos um alert para fazer o fluxo:
+	````html
+	  <div class="alert alert-danger" *ngIf="!nome.valid && nome.touched">
+            <p>Nome é obrigatório</p>
+        </div>
+	````
+- Podemos utilizar as funcionalidades dos alerts conforme necessidade para sinalizar erros
+- Conseguimos utilizar varias formas de ajuste para o nosso formulário.
+- Na proxima aula vamos ajustar para a não entrada de valores nulos.
 
 # 09. Forms (template driven) Desabilitando o botão de submit para formulário inválido
 
