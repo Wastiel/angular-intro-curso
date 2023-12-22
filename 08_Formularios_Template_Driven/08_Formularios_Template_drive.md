@@ -1,4 +1,4 @@
-# Rotas
+# Formulários (Template Driven) 
 
 # 01. Formulários (template vs data / reativo) Introdução
 
@@ -563,12 +563,243 @@
 
 # 12. Forms (template driven) Refatorando (simplificando) CSS e mensagens de erro
 
+- [Vídeo Aula](https://youtu.be/FXrOR84Equ4)
+- Refatorar o Template CSS e simplificar as mensagens de erro.
+- O nosso formulário está começando a ficar muito grande. 
+- Conseguimos simplificar o nosso código
+	- Melhroar a manutenção
+	- Mais fácil de adicionar campos ao nosso form.
+- Primeiramente classe que nos retorna o css com configuração dos erros, dentro do nosso component
+	````typeScript
+		verificaValidTouched(campo: any){
+	    return !campo.valid && campo.touched;
+
+	  }
+
+	  aplicaCssErro(campo: { valid: any; touched: any; }){
+
+	    return {
+	      'has-error': this.verificaValidTouched(campo),
+	      'has-feedback': this.verificaValidTouched(campo),
+	  }
+	````
+- Posterior retiramos algumas linhas de código e ajustamos a função:
+	````typeScript
+		<div class="form-group mb-3" [ngClass]="aplicaCssErro(nome)">  
+	````
+- Com isto agora, podemos chamar qualquer campo e setar o nosso CSS da maneira que acharmos melhor
+- Posteriro conseguimos ajustar campos do nosso formulário com um padrão de campo
+- Criamos o componenete:
+	- ng g c campo-control-erro
+- Adicionamos o componente criado ao model do template form.
+- Retiramos do app.module para nao gerar erro.
+- Dentro do componente, passamos o seguinte bloco de código:
+	````html
+		<div class="alert alert-danger " *ngIf="!nome.valid && nome.touched">
+                <p>Nome é obrigatório</p>
+            </div>
+	````
+- Posterior, fizemos o ajuste para se conversar com o componente e deixarmos o código mais organizado
+	````typeScript
+		@Input() mostraErro!: boolean;
+  		@Input() msgErro!: string;
+
+	````
+- Agora ajustamos o nosso html
+	````html
+	        <app-campo-control-erro 
+                [mostraErro]="verificaValidTouched(nome)" msgErro="Nome é obrigatório">
+            </app-campo-control-erro>  
+	````
+	- Adicionamos o nosso componente genérico, recebendo parametros para mostra em tela as informações.
+- É possivel utilizarmos o angular para criar métodos no nosso componente e deixar o nosso formulário mais limpo.
+
 # 13. Forms (template driven) Form groups (agrupando dados)
+
+- [Vídeo Aula](https://youtu.be/ZuQZBuGTIxc)
+- Como agrupar campos do formulario em outro objeto.
+- Temos um objeto endereço e podemos agrupar o mesmo, para ficar melhor organizado
+- É bem simples de organizarmos. 
+- Procramos os campos que queremos agrupar
+- Colocamos a dirtiva conforme abaixo:
+	````html
+		<div ngModelGroup="endereco">
+		</div>
+	````
+- Com isto separamos um gurpo de campos e criamos um obejeto de "Forms"
+
 
 # 14. Forms (template driven) Pesquisando endereço automaticamente com CEP
 
+- [Vídeo Aula](https://youtu.be/oLtdDwNcfoM)
+- Vamos utilizar um webservice, pesquisar o endereço através de um CEP e popular os campos de forma automática.
+- Quando digitarmos o CEP, o campo perder o foco, vamos pesquisar via web service os demais campos e posterior preencher os mesmos de forma automaticamente.
+- Vamos utilizar para isto o via cep
+	[Via CEP](https://viacep.com.br/)
+- Ele trabalha com "json" ou "xml"
+- Vamos trabalhar com json, mais facil de organizar os dados
+- Se abrirmoso o exemplo abaixo, nos traz os dados das seguintes maneiras:
+	- [Link da API](https://viacep.com.br/ws/01001000/json/)
+	- Retorno
+		````json
+		{
+		  "cep": "01001-000",
+		  "logradouro": "Praça da Sé",
+		  "complemento": "lado ímpar",
+		  "bairro": "Sé",
+		  "localidade": "São Paulo",
+		  "uf": "SP",
+		  "ibge": "3550308",
+		  "gia": "1004",
+		  "ddd": "11",
+		  "siafi": "7107"
+		}
+		````
+- Vamos utilizar jquery, por ser mais facil de entender
+- [Exemplo jquery](https://viacep.com.br/exemplo/jquery/)
+- Vamos utilizar o nosso template-form.component, para executar o procesos.
+- Construimos uma função em javascript onblur, para quando o campo perder o foco ele chamar uma função consultaCEP
+	````html
+		<input type="text" class="form-control" id="cep" name="cep" ngModel required #cep="ngModel"
+                (blur)="consultaCEP(cep.value)"
+                >
+	````
+- Agora vamos começar a criar a determinada função.
+- Criamos a função com a seguinte camada JavaScript
+	````TypeScript
+		consultaCEP(cep: any) {
+	        console.log(cep);
+	         //Nova variável "cep" somente com dígitos.
+	         // Próprio CEP faz o replace dos digitos (CEP variavel)
+	         cep = cep.replace(/\D/g, '');
+
+	        //Verifica se campo cep possui valor informado.
+	        if (cep != "") {
+
+	          //Expressão regular para validar o CEP.
+	          var validacep = /^[0-9]{8}$/;
+
+	           //Valida o formato do CEP.
+	           if(validacep.test(cep)){
+	            this.http.get(`//viacep.com.br/ws/${cep}/json`).subscribe(dados => console.log(dados));                     
+	           }
+	        }
+	      }
+	````
+- Fizemos uma chamada http, ara mostrar os valores via console log do determinado CEP que estamos buscando:
+	````typeScript
+		this.http.get(`//viacep.com.br/ws/${cep}/json`).subscribe(dados => console.log(dados));
+	````
+	- Retornando os seguintes dados:
+		````json
+			{
+			  "cep": "01001-000",
+			  "logradouro": "Praça da Sé",
+			  "complemento": "lado ímpar",
+			  "bairro": "Sé",
+			  "localidade": "São Paulo",
+			  "uf": "SP",
+			  "ibge": "3550308",
+			  "gia": "1004",
+			  "ddd": "11",
+			  "siafi": "7107"
+			}
+		````
+
 # 15. Forms (template driven) Populando campos com setValue e patchValue (autocomplete CEP)
+
+- [Vídeo Aula](https://youtu.be/6DxHNKzlqGQ)
+- Popular os campos com a informação obtida na ultima aula
+- Vamos ver a diferença do set value e get value.
+- Vamos obter as informações e preencher os dados dos formularios.
+- Vamos passar o formulário nas nossas funções.
+- Criamos a função para preencher o formulário
+	````typeScript
+		populaDadosForm(dados: any,form: any){
+        form.setValue({
+          nome: form.value.nome,
+          email: form.value.email,
+          endereco: {
+            rua: dados.logradouro,
+            cep: dados.cep,
+            numero: '',
+            complemento: dados.complemento,
+            bairro: dados.bairro,
+            cidade: dados.localidade,
+            estado: dados.uf
+          }
+        });
+
+      }
+	````
+	- Preenchemos os dados conforme retorno da chamada http que realizamos.
+	- com a passada do form.value, setamos os valores em cada um dos campos.
+- utilizar setvalue, tem um pequeno detalhe.
+	- Quando colocamos os dados, o nome e o e-mail estão sendo populados.
+- Formulário possui um pathvalue.
+- Podemos utilizar o pathValue, para focar somente nos elementos necessários, sem trabalhar o formulário inteiro:
+	````typeScript
+		populaDadosForm(dados: any, form: any){
+       
+        form.form.patchValue({
+          endereco: {
+            rua: dados.logradouro,
+            cep: dados.cep,           
+            complemento: dados.complemento,
+            bairro: dados.bairro,
+            cidade: dados.localidade,
+            estado: dados.uf
+          }
+
+        })
+        console.log(form);
+
+      }
+	````
+- Criamos também uma função para resetar o formulário
+	````typeScript
+		resetaDadosForm(form: any){
+        form.form.patchValue({
+          endereco: {
+            rua: null,
+            complemento: null,
+            bairro: null,
+            cidade: null,
+            estado: null
+          }
+        });
+	````
 
 # 16. Forms (template driven) Submetendo valores com HTTP POST
 
-Validar como é estruturado o CSS no nosso projeto.
+- [Vídeo Aula](https://youtu.be/26OzBOTc1hg)
+- Submeter um formulário
+- Emular envio de dados para o nosso servidor
+- Em debug, conseguimos ver a proprideade value do nosso formulário, dentro a um objeto e é ela que vamos simular o envio.
+- Transformamos os nossos dados em json para envio dos dados.
+- Utilizamos a seguinte função:
+	````typeScript
+		onSubmit(form: any){
+
+		    this.contador++;
+		    console.log(form);    
+		   
+
+		    this.http.post('https://httpbin.org/post', JSON.stringify(form.value))
+		      .subscribe(dados => {
+		        console.log(dados);
+		        form.form.reset();
+		      });
+		      
+		    console.log(this.usuario);  
+		    console.log(this.contador);  
+		    
+
+		  }
+	````
+	- Com isto conseguimos analisar no debug a aba rede e verificar o nosso json sendo enviado.
+- HTTP vamos nos profundar em outros módulos
+- [Serviço de testes HTTP](https://resttesttest.com/)
+	- Este link é muito bom, pois podemos testar o envio de informações para o back end.
+
+Dúvidas aulas: Validar como é estruturado o CSS no nosso projeto.
