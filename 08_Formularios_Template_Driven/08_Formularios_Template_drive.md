@@ -802,4 +802,4 @@
 - [Serviço de testes HTTP](https://resttesttest.com/)
 	- Este link é muito bom, pois podemos testar o envio de informações para o back end.
 
-Dúvidas aulas: Validar como é estruturado o CSS no nosso projeto.
+
