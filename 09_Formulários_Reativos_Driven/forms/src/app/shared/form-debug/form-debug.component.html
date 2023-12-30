@@ -1,0 +1,15 @@
+<div style="margin-top: 2px " *ngIf="form" class="alert alert-info">
+    Detalhes do Form
+</div>
+<div style="margin-top: 2px " *ngIf="form" class="alert alert-info">    
+            Form válido: {{ form.valid }}            
+</div>
+<div style="margin-top: 2px " *ngIf="form" class="alert alert-info">
+            Form Submetido: {{ form.submitted }}        
+        </div>
+    
+<div style="margin-top: 2px " *ngIf="form" class="alert alert-info">
+        <pre style="margin-top: 10px;">
+            Form Valores: <br>{{ form.value | json}}        
+        </pre>      
+</div>
