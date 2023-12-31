@@ -315,7 +315,14 @@ Snipets
 
 - Para criarmos rotas defoults com snipet
 	- a-route-paht-default
+- (ngSubmit)="onSubmit()"
 
+shift + alt + F para alinhar as informações
+
+- Como temos erro de pq a variavel nao é tipada ou não aceita determinado tipo de informação
+
+
+- Entender como funciona a traduação via pipe de dados.
 
 
 

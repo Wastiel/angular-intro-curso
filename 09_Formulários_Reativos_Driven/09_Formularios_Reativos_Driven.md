@@ -1469,15 +1469,466 @@
 
 - [Vídeo Aula](https://youtu.be/pAGAtspXnyc)
 - Aprender pq os formulários reativos são reativos.
+- Vamos nos basear no INPUT usando api do angular.
+- Podemos escutar eventos em qualquer lugar do formulário. 
+- Conseguimos pegar em tempo real as informações conforme ações do formulário.
+	````typeScript
+		   this.formulario.get('endereco.cep')?.valueChanges
+    .subscribe(value => console.log('valor CEP:', value));
+	````
+- Queremos somente validar o CEP se aos outras validções ja estiverm ok, como no caso os 8 digitos
+- utilizamos o switchmap para retornar um obsarvble para validação de status, depois validamos com o CEP em sí. 
+	````typeScript
+		this.formulario.get('endereco.cep')?.statusChanges
+	      .pipe(
+	        distinctUntilChanged(),
+	        tap(value => console.log('status CEP:', value)),
+	        switchMap(status => status === 'VALID' ?
+	          this.cepService.consultaCEP(this.formulario.get('endereco.cep')?.value)
+	          : empty()
+	        )
+	      )
+	      .subscribe(dados => dados ? this.populaDadosForm(dados) : {});
+	````
+- Uma forma de consultar o CEP de uma forma mais reativa.
+- 
 
 # 27. Formulários reativos: Campo input customizado (ControlValueAcessor)
 
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/tHK-k7GxAAE)
+- Criar um campo de input customizado.
+- Os campos inputs se repetem. 
+- criamos um novo conponente
+	- ng g c shared/input-field
+- Após a criação temos que importar dentro do shared module da seguinte maneira:
+	````typeScript
+		@NgModule({
+		  declarations: [
+		  FormDebugComponent,
+		  CampoControlErroComponent,
+		  ErrorMsgComponent,
+		  InputFieldComponent
+		  ],
+		  imports: [
+		    CommonModule,
+		    HttpClientModule,
+		    FormsModule    
+		  ],
+		  exports: [
+		  FormDebugComponent,
+		  CampoControlErroComponent,
+		  ErrorMsgComponent,
+		  InputFieldComponent   
+		  ],
+		  providers: [DropdownService]
+		})
+	````
+- Ajustamos o html do nosso inputo
+	````html
+		<div class="form-group" [ngClass]="classeCss">
+	    <label [attr.for]="id" class="control-label">{{ label }}</label>
+	    <input [type]="type" class="form-control"
+	      [id]="id" [readonly]="!!isReadOnly"
+	      [(ngModel)]="value">
+	    <app-error-msg [control]="control" [label]="label"></app-error-msg>
+	  </div>
+	````
+- também ajustamos o nosso input-field
+	````typeScript
+		import { Component, Input, forwardRef } from '@angular/core';
+		import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
+		const INPUT_FIELD_VALUE_ACCESSOR: any = {
+		  provide: NG_VALUE_ACCESSOR,
+		  useExisting: forwardRef(() => InputFieldComponent),
+		  multi: true
+		};
+
+		@Component({
+		  selector: 'app-input-field',
+		  templateUrl: './input-field.component.html',
+		  styleUrls: ['./input-field.component.css'],
+		  providers: [INPUT_FIELD_VALUE_ACCESSOR]
+		})
+		export class InputFieldComponent implements ControlValueAccessor {
+
+		  @Input() classeCss: any;
+		  @Input() id!: string;
+		  @Input() label!: string;
+		  @Input() type = 'text';
+		  @Input() control: any;
+		  @Input() isReadOnly = false;
+
+		  private innerValue: any;
+
+		  get value() {
+		    return this.innerValue;
+		  }
+
+		  set value(v: any) {
+		    if (v !== this.innerValue) {
+		      this.innerValue = v;
+		      this.onChangeCb(v);
+		    }
+		  }
+
+		  onChangeCb: (_: any) => void = () => {};
+		  onTouchedCb: (_: any) => void = () => {};
+
+		  writeValue(v: any): void {
+		    this.value = v;
+		  }
+
+		  registerOnChange(fn: any): void {
+		    this.onChangeCb = fn;
+		  }
+
+		  registerOnTouched(fn: any): void {
+		    this.onTouchedCb = fn;
+		  }
+
+		  setDisabledState?(isDisabled: boolean): void {
+		    this.isReadOnly = isDisabled;
+		  }		
+	````
+- Com isto criamos o nosso campo html e conseguimos utilizar o mesmo de forma genérica, passando parametros..
+	````html
+		<app-input-field class="col-sm-12" formControlName="nome"
+	    [classeCss]="aplicaCssErro('nome')"
+	    id="nome" label="Nome" [control]="formulario.get('nome')"
+	    ></app-input-field>
+	````
+
 
 # 28. Formulários reativos: Classe base para Forms (herança no Angular)
 
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/2Wo172lzHyM)
+- Temos diversos métodos nas aulas de forulários, que podemos retuilizar em diversos formulários. 
+- Mesmo comportamento em todos os formulários.
+- Vamos utilizar herança
+- Até agora só utilizamos composição
+- Criamos um componente novo
+	- ng g c shared/base-form
+- Ajustamos o base-form.component da seguinte maneira:
+	````typeScript
+		import { Component } from '@angular/core';
+		import { FormArray, FormGroup } from '@angular/forms';
+
+		@Component({
+		  selector: 'app-base-form',
+		  template: '<div></div>',  
+		})
+		export abstract class BaseFormComponent {
+
+		formulario!: FormGroup;
+
+		abstract submit(): any;
+
+		onSubmit() {
+		  if (this.formulario.valid) {
+		    this.submit();
+		  } else {
+		    console.log('formulario invalido');
+		    this.verificaValidacoesForm(this.formulario);
+		  }
+		}
+
+		verificaValidacoesForm(formGroup: FormGroup | FormArray) {
+		  Object.keys(formGroup.controls).forEach(campo => {
+		    console.log(campo);
+		    const controle = formGroup.get(campo);
+		    controle!.markAsDirty();
+		    controle!.markAsTouched();
+		    if (controle instanceof FormGroup || controle instanceof FormArray) {
+		      this.verificaValidacoesForm(controle);
+		    }
+		  });
+		}
+		resetar() {
+		  this.formulario.reset();
+		}
+
+		verificaValidTouched(campo: string) {
+		  return (
+		    !this.formulario.get(campo)?.valid &&
+		    (this.formulario.get(campo)?.touched || this.formulario.get(campo)?.dirty)
+		  );
+		}
+
+		verificaRequired(campo: string) {
+		  return (
+		    this.formulario.get(campo)?.hasError('required') &&
+		    (this.formulario.get(campo)?.touched || this.formulario.get(campo)?.dirty)
+		  );
+		}
+
+		verificaEmailInvalido() {
+		  const campoEmail = this.formulario.get('email');
+		  if (campoEmail!.errors) {
+		    return campoEmail!.errors['email'] && campoEmail!.touched;
+		  }
+		}
+
+		aplicaCssErro(campo: string) {
+		  return {
+		    'has-error': this.verificaValidTouched(campo),
+		    'has-feedback': this.verificaValidTouched(campo)
+		  };
+		}
+
+		}
+
+	````
+- o data-form.component
+	````typeScript
+		import { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { DropdownService } from '../shared/services/dropdown.service';
+import { EstadoBr } from '../shared/models/estado-br.model';
+import { ConsultaCepService } from '../shared/services/consulta-cep.service';
+import { Observable, distinctUntilChanged, empty, map, switchMap, tap } from 'rxjs';
+import { FormValidations } from '../shared/form-validations';
+import { VerificaEmailService } from './services/verifica-email.service';
+import { BaseFormComponent } from '../shared/base-form/base-form.component';
+
+@Component({
+  selector: 'app-data-form',
+  templateUrl: './data-form.component.html',
+  styleUrls: ['./data-form.component.css']
+})
+export class DataFormComponent extends BaseFormComponent implements OnInit{
+  estados!: Observable <EstadoBr[]>;
+  cargos!: any[];
+  tecnologias!: any[];
+  newsletterop!: any[];
+  frameworks = ['Angular', 'React', 'Vue', 'Sencha'];
+
+
+  constructor(
+    private formBuilder: FormBuilder, 
+    private http: HttpClient,
+    private dropdownService: DropdownService,
+    private cepService: ConsultaCepService,
+    private verificaEmailService: VerificaEmailService
+     ){
+  super();
+  }
+
+  ngOnInit(){
+
+    this.tecnologias = this.dropdownService.getTecnologias();
+
+    this.cargos = this.dropdownService.getCargos();
+
+    this.estados = this.dropdownService.getEstadosBR();
+
+    this.newsletterop = this.dropdownService.getNewsletter();
+    
+    this.formulario = this.formBuilder.group({
+      nome: [null, [Validators.required, Validators.minLength(3), Validators.maxLength(5)]],
+      email: [null, [Validators.required, Validators.email], [this.validarEmail.bind(this)]],
+      confirmarEmail: [null, [FormValidations.equalsTo('email')]],
+      endereco: this.formBuilder.group
+      ({
+        cep: [null, [Validators.required, FormValidations.cepValidator]],
+        numero: [null, Validators.required],
+        complemento: [null],
+        rua: [null, Validators.required],
+        bairro: [null, Validators.required],
+        cidade: [null, Validators.required],
+        estado: [null, Validators.required]
+      }),
+
+      cargo: [null],
+      tecnologia: [null],
+      newsletterop: ['s'],
+      termos: [null, Validators.pattern('true')],
+      frameworks: this.buildFrameworks()
+
+    });
+
+    this.formulario.get('endereco.cep')?.statusChanges
+      .pipe(
+        distinctUntilChanged(),
+        tap(value => console.log('status CEP:', value)),
+        switchMap(status => status === 'VALID' ?
+          this.cepService.consultaCEP(this.formulario.get('endereco.cep')?.value)
+          : empty()
+        )
+      )
+      .subscribe(dados => dados ? this.populaDadosForm(dados) : {});    
+  }
+
+  getFrameworksControls() {    
+    return this.formulario.get('frameworks') ? (<FormArray>this.formulario.get('frameworks')).controls : null;
+  }
+
+  buildFrameworks() {
+    const values = this.frameworks.map(v => this.formBuilder.control(false));    
+    return this.formBuilder.array(values, FormValidations.requiredMinCheckBox(1) )
+
+  }
+
+
+  submit(){
+    
+    console.log(this.formulario.value);
+
+    let valueSubmit = Object.assign({}, this.formulario.value);
+
+    valueSubmit = Object.assign(valueSubmit, {
+      frameworks: valueSubmit.frameworks.map((v: any, i: any) => v ? this.frameworks[i] : null)
+      .filter((v: null) => v !== null)
+    });    
+
+    console.log(valueSubmit)
+
+    this.http.post('https://httpbin.org/post', JSON.stringify(valueSubmit))
+      .subscribe((dados: any) => {
+        console.log(this.formulario);
+        //reseta o form        
+        //this.resetar();
+      },
+      (error: any) => alert('erro'));
+  }
+verificarEmailInvalido(){ 
+  
+ return this.formulario.get('email')?.errors && (this.formulario.get('email')?.touched) || false;
+ }
+
+consultaCEP() {
+
+  let cep = this.formulario.get('endereco.cep')?.value;
+ 
+  if (cep != null && cep !== '') 
+  {
+    this.cepService.consultaCEP(cep)?.subscribe(dados => this.populaDadosForm(dados));                     
+  }
+  
+
+}
+
+populaDadosForm(dados: any){
+
+  this.formulario.patchValue({
+    endereco: {
+      rua: dados.logradouro,
+      cep: dados.cep,           
+      complemento: dados.complemento,
+      bairro: dados.bairro,
+      cidade: dados.localidade,
+      estado: dados.uf
+    }
+  });
+  this.formulario.get('nome')?.setValue('Willian');
+  console.log(this.formulario);  
+
+}
+
+resetaDadosForm(){
+  this.formulario.patchValue({
+    endereco: {
+      rua: null,
+      complemento: null,
+      bairro: null,
+      cidade: null,
+      estado: null
+    }
+  });
+}
+
+setarCargo() {
+  const cargo = {nome: 'Dev', nivel: 'Pleno', desc: 'Dev Pl'};
+  this.formulario.get('cargo')?.setValue(cargo);
+  }
+
+compararCargos(obj1: any, obj2: any){  
+  //console.log(obj1)
+  return obj1 && obj2 ? (obj1.nivel === obj2.nivel) : obj1 === obj2;
+    }
+
+setarTecnologias() {  
+  this.formulario.get('tecnologia')?.setValue(['java', 'javascript', 'php']);
+  }
+
+validarEmail(formControl: FormControl) {
+    return this.verificaEmailService.verificarEmail(formControl.value)
+      .pipe(map(emailExiste => emailExiste ? { emailInvalido: true } : null));
+  }
+}
+
+	````
+- LIteralmente colocamos diversas validações em um base para usarmos em todos os formulários
+	- Com validações gerais
+- E validações especificas ficam em um unico lugar. 
+- A ideia entra para não repetirmos tanto código no angular;
 
 # 29. Formulários reativos: Combobox aninhado: Estado + Cidade
 
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/caumPDVYZN4)
+- Formulários reativos,
+- Combo box aninhado estado + cidade
+- Quando selecionarmos um estado, vai trazer somente as cidades daquele estado.
+- Criamos o arquivo cidades.json
+	- [arquivos json com as cidades](https://github.com/felipefdl/cidades-estados-brasil-json/blob/master/Cidades.json)
+- Criamos o arquivo cidade.ts, onde configuramos a seguinte lógica
+	````typeScript
+		export interface Cidade {
+	    id: number;
+	    nome: string;
+	    estado: number;
+	  }
+	````
+- Depois criamos o seguinte serviço
+	````typeScript
+		 getCidades(idEstado: number): Observable<Cidade[]> {
+		    const cidades = this.http.get<Cidade[]>(`/assets/dados/cidades.json`)
+		      .pipe(
+		        map((cidades: Cidade[]) => cidades.filter(c => c.estado == idEstado))
+		      );
+		  
+		    return cidades;
+		  }
+	````
+- Criamos a nossa chamada
+	````typeScript
+		this.formulario.get('endereco.estado')?.valueChanges
+    .pipe(
+      switchMap(sigla => this.estados.pipe(
+        map(estados => estados.filter(estado => estado.sigla === sigla)),
+        tap(console.log),
+        map(estados => estados[0]?.id),
+        switchMap(id => this.dropdownService.getCidades(id))
+      ))
+    )
+    .subscribe((cidades: Cidade[]) => {
+      console.log('Cidades retornadas:', cidades);
+      this.cidades$ = of(cidades); // Use of para criar um novo Observable com o valor emitido
+    });
+
+	````
+- Posterior ajustamos o HTMl para podermos ter as cidades advindas do estado
+	````html
+		  <div class="col" [ngClass]="aplicaCssErro('endereco.estado')">
+            <label for="estado" class="control-label">Estado</label>
+            <select class="form-control" id="estado" name="estado" formControlName="estado">
+              <option *ngFor="let estado of estados | async" [value]="estado.sigla">{{ estado.nome }}</option>
+            </select>
+            <app-campo-control-erro [mostraErro]="!!verificaValidTouched('endereco.estado')"
+              msgErro="Estado é obrigatório">
+            </app-campo-control-erro>
+          </div>
+
+
+          <div class="col" [ngClass]="aplicaCssErro('endereco.cidade')">
+            <label for="cidade" class="control-label">Cidade</label>
+            <select class="form-control" id="cidade" name="cidade" formControlName="cidade">
+              <option *ngFor="let cidade of cidades$ | async" [value]="cidade.nome">{{ cidade.nome }}</option>
+            </select>
+            <app-campo-control-erro [mostraErro]="!!verificaValidTouched('endereco.cidade')"
+              msgErro="cidade é obrigatório">
+            </app-campo-control-erro>
+          </div>
+	````
+- 
