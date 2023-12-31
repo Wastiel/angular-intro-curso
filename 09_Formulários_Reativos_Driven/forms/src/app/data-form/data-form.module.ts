@@ -5,20 +5,19 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormDebugComponent } from '../shared/form-debug/form-debug.component';
 import { SharedModule } from '../shared/shared.module';
 import { HttpClientModule } from '@angular/common/http';
+import { InputFieldComponent } from '../shared/input-field/input-field.component';
 
 
 
 @NgModule({
   declarations: [
-    DataFormComponent,    
-    
-
+    DataFormComponent,     
   ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     SharedModule,
-    HttpClientModule
+    HttpClientModule,   
   ]
 })
 export class DataFormModule { }
