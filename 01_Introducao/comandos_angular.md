@@ -325,5 +325,76 @@ shift + alt + F para alinhar as informações
 - Entender como funciona a traduação via pipe de dados.
 
 
+Criar componente com routa 
+	- ng g m cursos --routing
+
+
+
+- Instalar Bootstrap 5 Angular
+	- [Referencia 1](https://loiane.com/2017/08/how-to-add-bootstrap-to-an-angular-cli-project/)
+	- [Referencia 2](https://valor-software.com/ngx-bootstrap/#/)
+	- npm install bootstrap
+	- ng add ngx-bootstrap
+	- Ajustamos o arquivo angular.json, dentro das tag's tyles
+		- "node_modules/bootstrap/dist/css/bootstrap.min.css",
+		- Scripts
+			- "node_modules/jquery/dist/jquery.min.js",
+  			- "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"  
+  		- Testar	
+	- Adicionamos os inportes ao app.module
+		````typeScript 
+		import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+		import { TooltipModule } from 'ngx-bootstrap/tooltip';
+		import { ModalModule } from 'ngx-bootstrap/modal';
+
+		@NgModule({
+		  imports: [
+		    BrowserModule,
+		    BsDropdownModule.forRoot(),
+		    TooltipModule.forRoot(),
+		    ModalModule.forRoot()
+		  ],
+		
+ 		- Código para teste
+ 		<div class="btn-group" dropdown>
+			  <button id="button-basic" dropdownToggle type="button" class="btn btn-primary dropdown-toggle"
+			          aria-controls="dropdown-basic">
+			    Button dropdown <span class="caret"></span>
+			  </button>
+			  <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu"
+			      role="menu" aria-labelledby="button-basic">
+			    <li role="menuitem"><a class="dropdown-item" href="#">Action</a></li>
+			    <li role="menuitem"><a class="dropdown-item" href="#">Another action</a></li>
+			    <li role="menuitem"><a class="dropdown-item" href="#">Something else here</a></li>
+			    <li class="divider dropdown-divider"></li>
+			    <li role="menuitem"><a class="dropdown-item" href="#">Separated link</a>
+			    </li>
+			  </ul>
+			</div>
+
+
+		  <button type="button" class="btn btn-primary"
+          tooltip="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
+    	Simple demo
+  			</button>
+
+  		/*
+	 import { setTheme } from 'ngx-bootstrap/utils';
+	   
+	  @Component({…})
+	  export class AppComponent {
+	    constructor() {
+	      setTheme('bs5'); // or 'bs4'
+	      …
+	    }
+	  }
+
+	*/
+  	````
+
+	// Pode ser necessario forçar a inicializaçõa do bootstrap 5 dentro
+
+	
+
 
 ngx-bootstrap
