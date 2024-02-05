@@ -8,3 +8,20 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'requests-http';
 }
+
+
+// Pode ser necessario forçar a inicializaçõa do bootstrap 5 dentro
+
+/*
+ import { setTheme } from 'ngx-bootstrap/utils';
+   
+  @Component({…})
+  export class AppComponent {
+    constructor() {
+      setTheme('bs5'); // or 'bs4'
+      …
+    }
+  }
+
+*/
+

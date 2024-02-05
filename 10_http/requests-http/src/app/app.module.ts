@@ -11,6 +11,7 @@ import { ModalModule } from 'ngx-bootstrap/modal';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { HttpClientModule } from '@angular/common/http';
 
+
 @NgModule({
   declarations: [
     AppComponent
@@ -24,9 +25,7 @@ import { HttpClientModule } from '@angular/common/http';
     ModalModule.forRoot(),
     BsDropdownModule.forRoot(),
     TabsModule.forRoot(),   
-    HttpClientModule
-     
-
+    HttpClientModule    
   ],
   providers: [    
   ],
