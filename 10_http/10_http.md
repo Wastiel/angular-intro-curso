@@ -455,22 +455,529 @@
 		                  <span class="visually-hidden">Loading...</span>
 		                </div>
 		            </div>
-		        </ng-template>
-
-		        
+		        </ng-template>		        
 	````
+- Com isto o fluxo de cursos, carrega somente uma vez. 
 
 # 07. Http + RxJS: Unsubscribe Automático
-- [Vídeo Aula]()
+
+- [Vídeo Aula](https://youtu.be/0w2i7h5c9jk)
+- Unscribe automático.
+- Sempre que possível utilizar o pype aysinc.
+- Mostrar diferentes maneiras de se inscrever. 
+- Criamos o hiperlink no navbar
+	````html
+		 <li class="nav-item">
+          <a class="nav-link" routerLinkActive="active" [routerLink]="['/rxjs-poc']">RxJS POC</a>
+        </li>       
+	````
+- Criamos o roteamento
+	````typeScript
+		 {
+		    path: 'rxjs-poc',
+		    loadChildren: () => import('./unsubscribe-rxjs/unsubscribe-rxjs.module').then(m => m.UnsubscribeRxjsModule)
+		  },
+	````
+- Criamos o modulo com roteamento
+	````typeScript
+		ng g m unsubscribe-rxjs --routing
+	````
+- Criamos o componente
+	- ng g c unsubscribe-rxjs/unsubscribe-poc
+	- Preenchemos a logica deste componente com o conteiner abaixo
+	````html
+		<div class="container">
+    <h3 class="mt-4 ml-3">RxJS POC - Unsubscribe</h3>
+    <div class="row mt-4 ml-3">
+      <form class="form-inline">
+        <div class="form-group mr-sm-2">
+          <input type="text" class="form-control" #valor placeholder="Valor">
+        </div>  
+        
+        <div class="form-group float-end">
+          <button type="button" class="btn btn-outline-primary" (click)="emitirValor(valor.value)">Emitir Valor</button>
+          <button type="button" class="btn btn-outline-danger" (click)="destruirComponentes()">Mostrar / Destruir Componentes</button>
+        </div>
+        <!--div class="form-group " >
+          <button type="button" class="btn btn-outline-danger" (click)="destruirComponentes()">Mostrar / Destruir Componentes</button>
+        </!--div-->
+      </form>
+    </div>
+    <div class="row mt-4" *ngIf="mostrarComponentes" >
+      <app-poc class="col-md-4"></app-poc>
+      <app-poc-unsub class="col-md-4"></app-poc-unsub>
+      <app-poc-async class="col-md-4"></app-poc-async>
+      <app-poc-take-until class="col-md-4"></app-poc-take-until>
+      <app-poc-take class="col-md-4"></app-poc-take>
+    </div>
+	````
+	````typeScript
+		import { Component, OnInit } from '@angular/core';
+		import { EnviarValorService } from '../enviar-valor.service';
+
+		@Component({
+		  selector: 'app-unsubscribe-poc',
+		  templateUrl: './unsubscribe-poc.component.html',
+		  styleUrls: ['./unsubscribe-poc.component.scss']
+		})
+		export class UnsubscribePocComponent implements OnInit {
+
+		  mostrarComponentes = true;
+
+		  constructor(private service: EnviarValorService) { }
+
+		  ngOnInit() {
+		  }
+
+		  emitirValor(valor: string) {
+		    this.service.emitirValor(valor);
+		  }
+
+		  destruirComponentes() {
+		    this.mostrarComponentes = !this.mostrarComponentes;
+		  }
+
+		}
+	````
+- Criamos o componente poc-base
+	- ng g c unsubscribe-rxjs/poc-base
+	````html
+		<div class="col">
+		  <div class="card mb-4">
+		    <div class="card-header text-white {{ estilo }}">{{ nome }}</div>
+		    <div class="card-body">
+		      <h3 class="card-title">{{ valor }}</h3>
+		    </div>
+		  </div>
+		</div>
+	````		
+	````typeScript
+		import { Component, OnInit, Input } from '@angular/core';
+
+		@Component({
+		  selector: 'app-poc-base',
+		  templateUrl: './poc-base.component.html',
+		  styleUrls: ['./poc-base.component.scss']
+		})
+		export class PocBaseComponent implements OnInit {
+
+		  @Input() nome!: string;
+		  @Input() valor!: string;
+		  @Input() estilo!: string;
+
+		  constructor() { }
+
+		  ngOnInit() {
+		  }
+
+		}
+	````
+- criamos os seguintes componentes na mao
+	- Diretorio: componentes
+		- poc-async.component.ts
+			````typeScript
+			import { Component, OnInit, OnDestroy } from '@angular/core';
+			import { EnviarValorService } from '../enviar-valor.service';
+			import { tap } from 'rxjs/operators';
+			import { Observable } from 'rxjs';
+
+			@Component({
+			  selector: 'app-poc-async',
+			  template: `
+			    <app-poc-base [nome]="nome"
+			      [valor]="(valor$ | async) ??  ' ' " estilo="bg-success">
+			    </app-poc-base>
+			  `
+			})
+			export class PocAsyncComponent implements OnInit, OnDestroy {
+
+			  nome = 'Componente com async';
+			  valor$!: Observable<string>;
+
+			  constructor(private service: EnviarValorService) { }
+
+			  ngOnInit() {
+			    this.valor$ = this.service.getValor()
+			      .pipe(tap(v => console.log(this.nome, v)));
+			  }
+
+			  ngOnDestroy() {
+			    console.log(`${this.nome} foi destruido`);
+			  }
+
+			}
+			````
+		- poc-take-until.component.ts
+			````typeScript
+				import { Component, OnInit, OnDestroy } from '@angular/core';
+				import { EnviarValorService } from '../enviar-valor.service';
+				import { tap, takeUntil } from 'rxjs/operators';
+				import { Subject } from 'rxjs';
+
+				@Component({
+				  selector: 'app-poc-take-until',
+				  template: `
+				    <app-poc-base [nome]="nome"
+				      [valor]="valor" estilo="bg-primary">
+				    </app-poc-base>
+				  `
+				})
+				export class PocTakeUntilComponent implements OnInit, OnDestroy {
+
+				  nome = 'Componente com takeUntil';
+				  valor!: string;
+
+				  unsub$ = new Subject();
+
+				  constructor(private service: EnviarValorService) {}
+
+				  ngOnInit() {
+				    this.service.getValor()
+				      .pipe(
+				        tap(v => console.log(this.nome, v)),
+				        takeUntil(this.unsub$)
+				      )
+				      .subscribe((novoValor: string) => this.valor = novoValor);
+				  }
+
+				  ngOnDestroy() {
+				    this.unsub$.next();
+				    this.unsub$.complete();
+				    console.log(`${this.nome} foi destruido`);
+				  }
+				}
+			````
+		- poc-take.component.ts
+			````typeScript
+				import { Component, OnInit, OnDestroy } from '@angular/core';
+				import { EnviarValorService } from '../enviar-valor.service';
+				import { tap, take } from 'rxjs/operators';
+
+				@Component({
+				  selector: 'app-poc-take',
+				  template: `
+				    <app-poc-base [nome]="nome"
+				      [valor]="valor" estilo="bg-info">
+				    </app-poc-base>
+				  `
+				})
+				export class PocTakeComponent implements OnInit, OnDestroy {
+
+				  nome = 'Componente com take';
+				  valor!: string;
+
+				  constructor(private service: EnviarValorService) {}
+
+				  ngOnInit() {
+				    this.service.getValor()
+				      .pipe(
+				        tap(v => console.log(this.nome, v)),
+				        take(1)
+				      )
+				      .subscribe((novoValor: string) => this.valor = novoValor);
+				  }
+
+				  ngOnDestroy() {
+				    console.log(`${this.nome} foi destruido`);
+				  }
+				}
+			````
+		- poc-unsub.component.ts
+			````typeScript
+				import { Component, OnInit, OnDestroy } from '@angular/core';
+				import { EnviarValorService } from '../enviar-valor.service';
+				import { Subscription } from 'rxjs';
+				import { tap } from 'rxjs/operators';
+
+				@Component({
+				  selector: 'app-poc-unsub',
+				  template: `
+				    <app-poc-base [nome]="nome"
+				      [valor]="valor" estilo="bg-secondary">
+				    </app-poc-base>
+				  `
+				})
+				export class PocUnsubComponent implements OnInit, OnDestroy {
+
+				  nome = 'Componente com unsubscribe';
+				  valor!: string;
+
+				  sub: Subscription[] = [];
+
+				  constructor(private service: EnviarValorService) { }
+
+				  ngOnInit() {
+				    this.sub.push(this.service.getValor()
+				      .pipe(tap(v => console.log(this.nome, v)))
+				      .subscribe((novoValor: string) => this.valor = novoValor));
+				  }
+
+				  ngOnDestroy() {
+				    this.sub.forEach(s => s.unsubscribe());
+				    console.log(`${this.nome} foi destruido`);
+				  }
+
+				}
+			````
+		- poc.component.ts
+			````typeScript
+				import { Component, OnInit, OnDestroy } from '@angular/core';
+				import { EnviarValorService } from '../enviar-valor.service';
+				import { tap } from 'rxjs/operators';
+
+				@Component({
+				  selector: 'app-poc',
+				  template: `
+				    <app-poc-base [nome]="nome"
+				      [valor]="valor" estilo="bg-danger">
+				    </app-poc-base>
+				  `
+				})
+				export class PocComponent implements OnInit, OnDestroy {
+
+				  nome = 'Componente sem unsubscribe';
+				  valor!: string;
+
+				  constructor(private service: EnviarValorService) { }
+
+				  ngOnInit() {
+				    this.service.getValor()
+				      .pipe(tap(v => console.log(this.nome, v)))
+				      .subscribe((novoValor: string) => this.valor = novoValor);
+				  }
+
+				  ngOnDestroy() {
+				    console.log(`${this.nome} foi destruido`);
+				  }
+
+				}
+
+			````
+- Requisição estilo Netflix, mantemos o componente ativo
+- Requisição ajax simples, destruimos a requisição.
+- Operador Take
+	- Numero, quantos vezes vai receber a resposta.
+	- Salvou o response, acabou.
+	- take(1)
+	- Soluções mais elegantes.
+- Cuidar com a inscrição ativa.
+- Componentes não usados tem que ser matados.
+- Sempre se desinscrever do observable.
 
 # 08. Capturando Erros (+ Erro com async)
-- [Vídeo Aula]()
+
+- [Vídeo Aula](https://youtu.be/ifyKt2a1CVk)
+- Vamos aprender a capturar erros com pype aysinc
+- Vamos parar o banco de dados de forma proposital. 
+- Alertar que aconteceu um erro na aplicação
+- Vamos utilizar o operador catch error.
+	````typeScript
+		ngOnInit(){
+    this.cursos$ = this.service.list()
+    .pipe(
+      catchError(error => {
+        console.error(error);
+        return empty();
+      })
+      );
+  } 
+
+	````
+- Estamos retornando empty na lógica em função de uma lógica que temos no nosso HTML
+- Fizemos um ajuste na nossa lógica, para considerar
+	````html
+		<ng-template #loadingError role="status">
+          <div *ngIf="error$ | async; else loading">
+            Erro ao carregar cursos. Tente novamente mais tarde.
+          </div>   
+          <ng-template #loading>
+            <div class="text-center">                
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          </ng-template>             
+        </ng-template>
+
+	````
+	- Simpleismente fizemos um controle com if e else do que pode ser mostrado na tela, caso o serviço não esteja ok.
+- Lógica do typeScript
+	````typeScript
+		export class CursosListaComponent implements OnInit{
+
+  //cursos!: Curso[];
+
+  error$ = new Subject<boolean>();
+  cursos$!: Observable<Curso[]>;
+
+  constructor(private service: CursosService){}
+
+  ngOnInit(){
+    this.cursos$ = this.service.list()
+    .pipe(
+      catchError(error => {
+        console.error(error);
+        this.error$.next(true);
+        return empty();
+      })
+      );
+  } 
+	````
+- Inicia o serviço de lista de cursos, se nao retornar nada (Tiver error), retorna empty para a logica do componente. Se tem, gera a lista de cursos
+- Ciramos um botão para atualizar a lista de cursos, como se fosse uma nova tentativa
+	````html
+		<button type="button" class="btn btn-secondary" (click)="onRefresh()">Atualizar</button>
+	````
+- Ajustamos a lógica do nosso carregar cursos
+	````typeScript
+	ngOnInit(){
+    this.onRefresh();
+    
+  } 
+  onRefresh() {
+    this.cursos$ = this.service.list()
+    .pipe(
+      catchError(error => {
+        console.error(error);
+        this.error$.next(true);
+        return empty();
+      })
+      );    
+    }
+
+	````
+- Podemos utilizar qualquer operador do rtjx
 
 # 09. Erro Http: Alerta de Erro com Bootstrap
-- [Vídeo Aula]()
 
+- [Vídeo Aula](https://youtu.be/_mxn3t80Lek)
+- Mostrar uma mensagem de erro com um componente de alerta do bootstrap 
+- Vamos utilizar uma modal para o ajuste. 
+- Serviço genérico com a modal em qualquer lugar. 
+- Criamos a página shared e criamos o seguinte componente
+	- ng g c shared/alert-modal
+- Vamos usar o alert com uma opção de x para encerrar a modal.
+	````html
+	<div class="alert alert-warning alert-dismissible fade show" role="alert">
+	  <strong>Holy guacamole!</strong> You should check in on some of those fields below.
+	  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+	````
+- Vamos fazer alguns ajustes para pegar a informação que está vindo do nosso componente e preencher o aler genérico. 
+- Ajustamos o html do nosso componente
+	````html
+  <div class="alert alert-{{ type }} mb-0 d-flex justify-content-between" role="alert">
+    <span>{{ message }}</span>
+    <button type="button" class="btn-close close" data-dismiss="alert" aria-label="Close" (click)="onClose()">
+      <span class="visually-hidden" aria-hidden="true">&times;</span>
+    </button>
+  </div>
+	````
+	- Se fermos ele tem parametros do que vai ser recebido
+- Posterior ajustamos a lógica do nosso componente com os padrões do ngx-bootstrap
+	````typeScript
+		export class AlertModalComponent {
+	  @Input() message!: string; 
+	  @Input() type = 'success'; 
+
+	  constructor(public bsModalRef: BsModalRef){
+	  }
+	  onClose(){
+    this.bsModalRef.hide();
+  }
+	}
+	````
+- Posterior setamos no nosso componente a determinada informação 
+	````typescript
+	bsModalRef!: BsModalRef;
+  error$ = new Subject<boolean>();
+  cursos$!: Observable<Curso[]>;
+
+	 handelError(){
+      this.bsModalRef = this.modalService.show(AlertModalComponent);
+      this.bsModalRef.content.type = 'danger';
+      this.bsModalRef.content.message = 'Erro ao carregar cursos. Tente novamente mais tarde.';
+    }
+	````
+- Exportamos o componente no modulo para todos poderem usar
+	````typeScript
+		@NgModule({
+		  declarations: [
+		    AlertModalComponent
+		  ],
+		  imports: [
+		    CommonModule
+		  ],
+		  exports:[AlertModalComponent]
+		})
+		export class SharedModule { }
+
+	````
+- temos que colocar dentro do app.module.ts o forRoot no nosso módulo, para todo mundo poder acessar
+	````typeScript
+		@NgModule({
+	  declarations: [
+	    AppComponent
+	  ],
+	  imports: [
+	    BrowserModule,
+	    AppRoutingModule,
+	    BrowserAnimationsModule,
+	    BrowserModule,
+	    TooltipModule.forRoot(),
+	    ModalModule.forRoot(),
+	    BsDropdownModule.forRoot(),
+	    TabsModule.forRoot(),   
+	    HttpClientModule    
+	  ],
+	  providers: [    
+	  ],
+	  bootstrap: [AppComponent]
+	})
+	````
+- 
 # 10. Serviço de alerta genérico com Bootstrap 4
-- [Vídeo Aula]()
+
+- [Vídeo Aula](https://youtu.be/TmIbSx_KR5Y)
+- Vamos criar um serviço genérico para poder ser utilizado na aplicação.
+- Reuso de código.
+- Criamos o serviço
+	- ng g s shared/alert-modal
+- Ajustamos a service: 
+	````typeScript
+		import { Injectable } from '@angular/core';
+		import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+		import { AlertModalComponent } from './alert-modal/alert-modal.component';
+
+		enum AlertTypes {
+		  DANGER = 'danger',
+		  SUCCESS = 'success'
+		}
+
+		@Injectable({
+		  providedIn: 'root'
+		})
+		export class AlertModalService {
+
+		  //bsModalRef!: BsModalRef;
+		  constructor(private modalService: BsModalService) { }
+
+		  private showAlert( message: string, type: string){
+		    const bsModalRef: BsModalRef = this.modalService.show(AlertModalComponent);
+		    bsModalRef.content.type = 'danger';
+		    bsModalRef.content.message = 'Erro ao carregar cursos. Tente novamente mais tarde.';
+		  }
+
+		  showAlertDanger(message: string){
+		    this.showAlert(message, AlertTypes.DANGER);
+		  }
+
+		  showAlerSuccess(message: string){
+		    this.showAlert(message, AlertTypes.SUCCESS);
+		  }
+		}
+
+	````
 
 # 11. Http: Criando formulário para criar e editar cursos
 - [Vídeo Aula]()
