@@ -978,9 +978,167 @@
 		}
 
 	````
+- Refatoramos o curso component
+	````typeScript
+		export class CursosListaComponent implements OnInit{
 
+	  //cursos!: Curso[];
+	  
+	  error$ = new Subject<boolean>();
+	  cursos$!: Observable<Curso[]>;
+
+	  constructor(private service: CursosService,
+	    // private modalService: BsModalService
+	    private alertService: AlertModalService   
+	    ){}
+
+	  ngOnInit(){
+	    this.onRefresh();
+	    
+	  } 
+
+	  onRefresh() {
+	    this.cursos$ = this.service.list()
+	    .pipe(
+	      catchError(error => {
+	        console.error(error);
+	        //this.error$.next(true);
+	        this.handelError();
+	        return empty();
+	      })
+	      );
+
+	      this.service.list()
+	      .pipe(
+	        catchError(error => empty())
+	      )
+	      .subscribe(
+	        dados => {
+	          console.log(dados);
+	         }
+	      )    
+	    }
+	  
+	    handelError(){
+	      this.alertService.showAlertDanger('Erro ao carregar cursos. Tente novamente mais tarde')
+	      /*this.bsModalRef = this.modalService.show(AlertModalComponent);
+	      this.bsModalRef.content.type = 'danger';
+	      this.bsModalRef.content.message = 'Erro ao carregar cursos. Tente novamente mais tarde.';*/
+	    }
+
+	}
+
+	````
+	
 # 11. Http: Criando formulário para criar e editar cursos
-- [Vídeo Aula]()
+
+- [Vídeo Aula](https://youtu.be/laPM0vojRSA)
+- Vamos fazer um formulário para~podermos cirar e editar cursos no futuro.
+- ng g c cursos/cursos-form
+- Adicionamos duas rotas para sinalizar novo curso e edição do curso.
+````typeScript
+	const routes: Routes = [
+  {path: '', component: CursosListaComponent},
+  {path: 'novo', component: CursosFormComponent},
+  {path: 'editar', component: CursosFormComponent}
+];
+```` 
+- Fizemos alguns ajustes no fonte e comentamos alguns pontos em que achamaos mais importantes.
+- Criamos o nosso formulário, para construção e validação
+````typeScript
+export class CursosFormComponent {
+
+  form!: FormGroup;
+  
+  constructor(private fb: FormBuilder){
+
+  }
+  ngOninit(){
+    this.form = this.fb.group({
+      nome: [null, [Validators.required, Validators.minLength(3), Validators.maxLength(250)]]      
+    });
+  }
+
+}
+````
+- Criamos as funções de envio e e cancelamento e validação no fonte
+	````html
+		<form class="row g-3 needs-validation" novalidate [formGroup]="form" style="padding-top: 10px;">
+    <div class="form-row">
+        <div class="col-sm-12">
+            <label for="nome">Nome do Curso</label>
+            <input 
+                type="text" 
+                class="form-control" 
+                id="nome"                 
+                placeholder="Nome do Curso"
+                formControlName="nome"
+                [ngClass]="{'is-invalid' : submitted && hasError('nome')}"
+            />  
+            <div  *ngIf="hasError('nome')" class="invalid-feedback">
+            
+                    <div *ngIf="form.controls['nome'].errors?.['required']">
+                        Por favor, insira o nome do curso.
+                    </div>
+                    <div *ngIf="form.controls['nome'].errors?.['minlength']">
+                        Mínimo 3 caracteres
+                    </div>
+                    <div *ngIf="form.controls['nome'].errors?.['maxlength']">
+                        Máximo 10 caracteres
+                    </div>
+             </div>               
+        </div>
+    </div>
+    <div style="margin-top: 10px;">
+        <button type="submit" class="btn btn-primary" (click)="onSubmit()">Salvar</button>
+        <button type="button" class="btn btn-default" (click)="onCancel()">Cancelar</button>
+    </div>
+</form>  
+	````
+	````typeScript
+		import { Component } from '@angular/core';
+	import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+	@Component({
+	  selector: 'app-cursos-form',
+	  templateUrl: './cursos-form.component.html',
+	  styleUrls: ['./cursos-form.component.scss']
+	})
+	export class CursosFormComponent {
+
+	  form!: FormGroup;
+	  submitted = false;
+	  
+	  constructor(private fb: FormBuilder){
+
+	  }
+	  ngOnInit(){
+	    this.form = this.fb.group({
+	      nome: [null, [Validators.required, Validators.minLength(3), Validators.maxLength(250)]]      
+	    });
+	  }
+
+	hasError(field: string){
+	  return this.form.get(field)?.errors;
+
+	}
+
+	  onSubmit(){
+	    this.submitted = true;
+	    console.log(this.form.value)
+	    if(this.form.valid){
+	      console.log('submit')
+	    }
+	  }
+	  onCancel(){
+	    this.submitted = false;
+	    this.form.reset();
+	    //console.log('onCancel')
+	  }
+
+	}
+
+	````
 
 # 12. HTTP POST Criando Cursos
 - [Vídeo Aula]()

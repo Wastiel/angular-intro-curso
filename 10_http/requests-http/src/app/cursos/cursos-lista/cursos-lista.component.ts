@@ -40,7 +40,7 @@ export class CursosListaComponent implements OnInit{
       })
       );
 
-      this.service.list()
+      /*this.service.list()
       .pipe(
         catchError(error => empty())
       )
@@ -48,7 +48,7 @@ export class CursosListaComponent implements OnInit{
         dados => {
           console.log(dados);
          }
-      )    
+      )*/    
     }
   
     handelError(){
