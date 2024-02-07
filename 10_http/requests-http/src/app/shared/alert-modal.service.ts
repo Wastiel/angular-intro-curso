@@ -15,10 +15,14 @@ export class AlertModalService {
   //bsModalRef!: BsModalRef;
   constructor(private modalService: BsModalService) { }
 
-  private showAlert( message: string, type: string){
+  private showAlert( message: string, type: AlertTypes, dismissTimeout?:number){
     const bsModalRef: BsModalRef = this.modalService.show(AlertModalComponent);
-    bsModalRef.content.type = 'danger';
-    bsModalRef.content.message = 'Erro ao carregar cursos. Tente novamente mais tarde.';
+    bsModalRef.content.type = type;
+    bsModalRef.content.message = message;
+
+    if(dismissTimeout){
+      setTimeout(() => bsModalRef.hide(), dismissTimeout);
+    }
   }
 
   showAlertDanger(message: string){
@@ -26,7 +30,7 @@ export class AlertModalService {
   }
 
   showAlerSuccess(message: string){
-    this.showAlert(message, AlertTypes.SUCCESS);
+    this.showAlert(message, AlertTypes.SUCCESS, 3000);
   }
 
 

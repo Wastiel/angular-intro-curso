@@ -1141,7 +1141,138 @@ export class CursosFormComponent {
 	````
 
 # 12. HTTP POST Criando Cursos
-- [Vídeo Aula]()
+
+- [Vídeo Aula](https://youtu.be/2TmYoPmPgdQ)
+- Vamos criar um formulário para editar e criar cursos
+- Podemos utilizar o formuláro para criar um curso novo.
+- Estamos usando o jsonServer
+- Criar o método do nosso serviço
+- Ajustamos o nosso curso form component para cadastrar os nossos cursos:
+````typeScript
+	import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CursosService } from '../cursos.service';
+import { AlertModalService } from 'src/app/shared/alert-modal.service';
+import { Location } from '@angular/common';
+
+@Component({
+  selector: 'app-cursos-form',
+  templateUrl: './cursos-form.component.html',
+  styleUrls: ['./cursos-form.component.scss']
+})
+export class CursosFormComponent {
+
+  form!: FormGroup;
+  submitted = false;
+  
+  constructor(private fb: FormBuilder, private service: CursosService,
+    private modal: AlertModalService, private location: Location){
+
+  }
+  ngOnInit(){
+    this.form = this.fb.group({
+      nome: [null, [Validators.required, Validators.minLength(3), Validators.maxLength(250)]]      
+    });
+  }
+
+hasError(field: string){
+  return this.form.get(field)?.errors;
+
+}
+
+  onSubmit(){
+    this.submitted = true;
+    console.log(this.form.value)
+    if(this.form.valid){
+      console.log('submit');
+      this.service.create(this.form.value).subscribe(
+        success => {this.modal.showAlerSuccess('Curso Criado com sucesso!');
+                    this.location.back();} ,
+        error => this.modal.showAlertDanger('Tente Novamente'),
+        ()=> console.log('request completo')
+      );
+    }
+  }
+  onCancel(){
+    this.submitted = false;
+    this.form.reset();
+    //console.log('onCancel')
+  }
+
+}
+
+````
+- Melhoramos os nossos alertas
+````typescript
+import { Injectable } from '@angular/core';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { AlertModalComponent } from './alert-modal/alert-modal.component';
+
+enum AlertTypes {
+  DANGER = 'danger',
+  SUCCESS = 'success'
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AlertModalService {
+
+  //bsModalRef!: BsModalRef;
+  constructor(private modalService: BsModalService) { }
+
+  private showAlert( message: string, type: AlertTypes, dismissTimeout?:number){
+    const bsModalRef: BsModalRef = this.modalService.show(AlertModalComponent);
+    bsModalRef.content.type = type;
+    bsModalRef.content.message = message;
+
+    if(dismissTimeout){
+      setTimeout(() => bsModalRef.hide(), dismissTimeout);
+    }
+  }
+
+  showAlertDanger(message: string){
+    this.showAlert(message, AlertTypes.DANGER);
+  }
+
+  showAlerSuccess(message: string){
+    this.showAlert(message, AlertTypes.SUCCESS, 3000);
+  }
+
+
+}
+
+````
+- Realizamos a criação do nosso curso
+````typeScript
+	import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Curso } from './curso';
+import { Observable, delay, take, tap } from 'rxjs';
+import { environment } from 'environments/environment';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CursosService {
+
+  private readonly API = `${environment.API}cursos`;
+  constructor(private http: HttpClient) { }
+
+  list(){
+    return this.http.get<Curso[]>(this.API)
+    .pipe(
+      delay(2000),
+      tap(console.log)
+    );
+
+  }
+
+  create(curso: any){
+    return this.http.post(this.API, curso).pipe(take(1));  }
+}
+
+````
 
 # 13. Http: Editando Cursos e Observables aninhados
 - [Vídeo Aula]()
