@@ -394,7 +394,9 @@ Criar componente com routa
 
 	// Pode ser necessario forçar a inicializaçõa do bootstrap 5 dentro
 
-	
+iniciar servidor
+
+json-server --watch db.json
 
 
 ngx-bootstrap

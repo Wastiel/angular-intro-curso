@@ -10,8 +10,7 @@
                 formControlName="nome"
                 [ngClass]="{'is-invalid' : submitted && hasError('nome')}"
             />  
-            <div  *ngIf="hasError('nome')" class="invalid-feedback">
-            
+            <div *ngIf="hasError('nome')" class="invalid-feedback">                         
                     <div *ngIf="form.controls['nome'].errors?.['required']">
                         Por favor, insira o nome do curso.
                     </div>
