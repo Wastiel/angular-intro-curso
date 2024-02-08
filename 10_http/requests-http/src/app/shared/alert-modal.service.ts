@@ -30,7 +30,7 @@ export class AlertModalService {
   }
 
   showAlerSuccess(message: string){
-    this.showAlert(message, AlertTypes.SUCCESS, 3000);
+    this.showAlert(message, AlertTypes.SUCCESS, 300000);
   }
 
 

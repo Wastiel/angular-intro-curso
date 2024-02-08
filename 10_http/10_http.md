@@ -1275,19 +1275,361 @@ export class CursosService {
 ````
 
 # 13. Http: Editando Cursos e Observables aninhados
-- [Vídeo Aula]()
+
+- [Vídeo Aula](https://youtu.be/ZsxoaAeWYdo)
+- Vamos aprender a editar um curso.
+- Preimeiramente criamos o apontamento da rota 
+	````typeScript
+	const routes: Routes = [
+	  {path: '', component: CursosListaComponent},
+	  {path: 'novo', component: CursosFormComponent},
+	  {path: 'editar/:id', component: CursosFormComponent}
+	];
+	````
+- ajustamos o evento no botão:
+	````html
+			<span class="float-end">
+	       <button class="btn btn-outline-warning mb-1 btn-sm" (click)="onEdit(curso.id)" >
+	           Atualizar
+	         </button>
+	       <button class="btn btn-outline-danger mb-1 btn-sm" >
+	          Remover
+	       </button>
+	    </span>            
+	````
+- Ajustamos o inicio da chamada:
+	````typeScript
+		    onEdit(id: number){
+      this.router.navigate(['editar', id ], {relativeTo: this.route});
+    }
+	````
+- ActivatedRoute é a classe que tem os parametros da rota
+- no ngOnInit, pegamos o parametro da rota:
+	````typeScript
+		 this.route.params.subscribe(
+      (params: any) => {
+        const id = params['id'];
+        console.log(id);
+      }
+    );
+	````
+- Criamos uma função que chama o objeto e outra que joga o mesmo para a tela:
+	````typeScript
+		loadByID(id: number): Observable<Curso> {
+    return this.http.get<Curso>(`${this.API}/${id}`).pipe(
+      take(1),
+      map(curso => curso as Curso) // Convertendo o objeto retornado para o tipo Curso
+    );
+  }
+	````
+	````typeScript
+	 ngOnInit(){
+
+    this.route.params.subscribe(
+      (params: any) => {
+        const id = params['id'];
+        console.log(id);
+        const curso$ = this.service.loadByID(id);
+        curso$.subscribe(curso => {
+        this.updateForm(curso);
+        })
+      }
+    );
+    this.form = this.fb.group({
+      id: [null],
+      nome: [null, [Validators.required, Validators.minLength(3), Validators.maxLength(250)]]      
+    });
+  }
+
+  updateForm(curso: Curso){
+    this.form.patchValue({
+      id: curso.id,
+      nome: curso.nome
+    })
+  }
+	````
+- Async:
+- Precisamos inicializar o formulário dentro do construtor ou dentro do ngOnInit
+- Qualquer lógica do id, deve ser executada dentro subscribe
+- Metodos, para quebrar o fluxo ciclico do nosso código fonte.
+- Mais de um subscribe para pegar valores. 
+- Vamos refatorar o código do subscribe de edição
+	````typeScript
+	this.route.params
+      .pipe(
+        map((params: any) => 
+          params['id']),
+          switchMap (id => this.service.loadByID(id))
+      )      
+      .subscribe(curso => this.updateForm(curso));
+	````
+- switchmap
+	- Retorna um obsarvble
+	- Cancela as requisisções anteriores e foca somente na principal
+- Crate com concatMap -> ordem da requisição importa
+- margeMap -> ordem não importa
+- ExhaustMap - >Espera a resposta, comum em caso de logins
+- Fizemos um Neste caso ao trocarmos de rota, ele faz o unsubscribe e destroi o formulário. 
 
 # 14. Http: Editando Cursos + Resolver (Rota)
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/v0cShz4njDM)
+- Vamos trabalhar no formulário para editar curswos. 
+- Obtemos o id e depois obetmos o objeto curso
+- usaro resolver para obetr o curso no carregamento da rota
+- snapshot - foto da rota
+- Vamos devolve rum objeto curso, um observable de curso.
+- Podemos usar resolver, para rotas diferentes
+- Criamos o guarda de rotas
+	````typeScript
+		import { Injectable } from '@angular/core';
+		import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Resolve } from '@angular/router';
+		import { Observable, of } from 'rxjs';
+		import { Curso } from '../curso';
+		import { CursosService } from '../cursos.service';
+
+		@Injectable({
+		  providedIn: 'root'
+		})
+		export class CursoResolverGuard implements Resolve<Curso> {
+		  constructor(private service: CursosService) {}
+
+		  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
+		    if (route.params && route.params['id']) {
+		      return this.service.loadByID(route.params['id']);
+		    }
+
+		    return of({
+		      id: null,
+		      nome: null
+		    });
+		  }
+		}
+	````
+- Agora ajustamos a nossa rota
+	````typeScript
+		const routes: Routes = [
+	  {path: '', component: CursosListaComponent},
+	  {
+	    path: 'novo', 
+	    component: CursosFormComponent,
+	    resolve: {
+	      curso: CursoResolverGuard
+	    }
+	  },
+
+	  {path: 'editar/:id', 
+	  component: CursosFormComponent,
+	  resolve: {
+	    curso: CursoResolverGuard
+	  }}
+	];
+
+	@NgModule({
+	  imports: [RouterModule.forChild(routes)],
+	  exports: [RouterModule]
+	})
+	export class CursosRoutingModule { }
+	````
+- Com resolver, criamos um metodo mais enxuto para fazer o que é necessário fazer.
+````typeScript
+		ngOnInit(){
+
+	    /*this.route.params.subscribe(
+	      (params: any) => {
+	        const id = params['id'];
+	        console.log(id);
+	        const curso$ = this.service.loadByID(id);
+	        curso$.subscribe(curso => {
+	        this.updateForm(curso);
+	        })
+	      }
+	    );*/
+
+	    /*this.route.params
+	      .pipe(
+	        map((params: any) => 
+	          params['id']),
+	          switchMap (id => this.service.loadByID(id))
+	          //switchMap (cursos => obterAulas)
+	      )      
+	      .subscribe(curso => this.updateForm(curso));
+	    */
+
+	    const curso = this.route.snapshot.data['curso'];
+
+
+	    this.form = this.fb.group({
+	      id: [curso.id],
+	      nome: [curso.nome, [Validators.required, Validators.minLength(3), Validators.maxLength(250)]]      
+	    });
+	  }
+````
+
 
 # 15. Http PUT Atualizando Cursos
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/HK6EVFNVCoU)
+- Atualizar registros via API rest
+- Criamos a seguinte função para fazer o update de registros
+	````typeScript
+	 	update(curso: any){
+    return this.http.put(`${this.API}/${curso.id}`, curso).pipe(take(1));  }    
+	````
+- Fizemos uma primeira versão do criar e alterar
+	````typeScript
+
+  list(){
+    return this.http.get<Curso[]>(this.API)
+    .pipe(
+      delay(2000),
+      tap(console.log)
+    );
+
+  }
+
+  loadByID(id: number): Observable<Curso> {
+    return this.http.get<Curso>(`${this.API}/${id}`).pipe(
+      take(1),
+      map(curso => curso as Curso) // Convertendo o objeto retornado para o tipo Curso
+    );
+  }
+
+  private create(curso: any){
+    return this.http.post(this.API, curso).pipe(take(1));  }
+
+  private update(curso: any){
+    return this.http.put(`${this.API}/${curso.id}`, curso).pipe(take(1));  }
+  
+  save(curso: any){
+    if(curso.id){
+      return this.update(curso);
+    }
+    return this.create(curso);
+  }  
+
+	````
+- Refatoramos o nosso on submit
+
+	````typeScript
+		 onSubmit(){
+	    this.submitted = true;
+	    console.log(this.form.value)    
+	    if(this.form.valid){
+	      console.log('submit');
+
+	      let mgSucces = 'Curso Criado com sucesso!';
+	      let mgError = 'Erro ao criar curso, tente novamente';
+	      if (this.form.value.id){        
+	      mgSucces = 'Curso atualizado com sucesso!';
+	      mgError = 'Erro ao atualizar curso, tente novamente';
+	      }
+	      console.log(this.form.value)
+	      this.service.save(this.form.value).subscribe(
+	        success => {
+	          this.modal.showAlerSuccess(mgSucces);
+	          this.location.back();
+	        },
+	        error => {this.modal.showAlertDanger(mgError)}
+	      );
+
+	      /*
+	      if (this.form.value.id){
+	        //update
+	      this.service.update(this.form.value).subscribe(
+	        success => {
+	          this.modal.showAlerSuccess('Curso atualizado com sucesso!');
+	          this.location.back();} ,
+	        error => this.modal.showAlertDanger('Erro ao criar curso, tente novamente.'),
+	        ()=> console.log('update completo')
+	      );
+	      }else{
+	        //create
+	        this.service.create(this.form.value).subscribe(
+	          success => {this.modal.showAlerSuccess('Curso Criado com sucesso!');
+	                      this.location.back();} ,
+	          error => this.modal.showAlertDanger('Tente Novamente'),
+	          ()=> console.log('request completo')
+	        );
+	      }*/
+
+	    }
+	  }
+	````
+
 
 # 16. Http: Popup de Confirmação para remover Cursos
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/I0CI6KvqobA)
+- Remover recursos e adicionar uma poupup para completarmos o nosso curso. 
+- pegamos o modal e passamos um template para o mesmo
+- @ViweChield template core
+
+- Pegamos a modal de confirmar do ngx bootstrap
+- Nela criamos os seguintes pontos.
+	- função de deletar do front
+	- Adicionamos a popup conforme documentação
+	````typeScript
+	  deleteModalRef!: BsModalRef;
+  @ViewChild('deleteModal') deleteModal: any;
+  constructor(private service: CursosService,
+    private modalService: BsModalService,
+    private alertService: AlertModalService,
+    private router: Router,
+    private route: ActivatedRoute   
+    ){}
+
+
+		onDelete(id: number){
+      this.deleteModalRef = this.modalService.show(this.deleteModal, { class: 'modal-sm' });
+    }
+
+	````
+- Criamos a seguinte modal no HTML
+	````html
+	<ng-template #deleteModal>
+	  <div class="modal-body text-center">
+	    <p>Do you want to confirm?</p>
+	    <button type="button" class="btn btn-default" >Yes</button>
+	    <button type="button" class="btn btn-primary" >No</button>
+	  </div>
+	</ng-template>
+	````
+- Vamos colocar a parte de confirmar ou cancelar, conforme documentação
+	````typeScript
+		    onConfirmDelete() {
+	      this.deleteModalRef.hide();
+	      
+	    }
+	   
+	    onDeclineDelete() {
+	      this.deleteModalRef.hide();
+	    }
+
+	````
+- Criamos o nosso serviço
+	````typeScript
+		 remove(id: number){
+	    return this.http.delete(`${this.API}/${id}`).pipe(take(1));
+
+	  }
+	````
+- Fiezemos a chamada do serviço para deletar o curso
+	````typeScript
+		    onConfirmDelete() {
+	      this.service.remove(this.cursoSelecionado.id).subscribe(
+	        success => {this.onRefresh(), this.onDeclineDelete},
+	        error => {this.alertService.showAlertDanger('Erro ao remover o curso. Tente novamente mais tarde'), this.onDeclineDelete}
+	      );
+	      this.deleteModalRef.hide();      
+	    }
+	   
+	    onDeclineDelete() {
+	      this.deleteModalRef.hide();
+	    }
+
+	````
 
 # 17. Popup de Confirmação genérica Bootstrap 4 (com RxJS)
 - [Vídeo Aula]()
+- vamos construir um componente reutilizavel
 
 # 18. Http: Serviço Genérico de CRUD
 - [Vídeo Aula]()

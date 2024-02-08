@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CursosService } from '../cursos.service';
 import { Curso } from '../curso';
 import { Observable, Subject, catchError, empty } from 'rxjs';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { AlertModalComponent } from 'src/app/shared/alert-modal/alert-modal.component';
 import { AlertModalService } from 'src/app/shared/alert-modal.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-cursos-lista',
@@ -19,9 +20,16 @@ export class CursosListaComponent implements OnInit{
   error$ = new Subject<boolean>();
   cursos$!: Observable<Curso[]>;
 
+  cursoSelecionado!: Curso;
+
+  deleteModalRef!: BsModalRef;
+  @ViewChild('deleteModal') deleteModal: any;
+
   constructor(private service: CursosService,
-    // private modalService: BsModalService
-    private alertService: AlertModalService   
+    private modalService: BsModalService,
+    private alertService: AlertModalService,
+    private router: Router,
+    private route: ActivatedRoute   
     ){}
 
   ngOnInit(){
@@ -56,6 +64,27 @@ export class CursosListaComponent implements OnInit{
       /*this.bsModalRef = this.modalService.show(AlertModalComponent);
       this.bsModalRef.content.type = 'danger';
       this.bsModalRef.content.message = 'Erro ao carregar cursos. Tente novamente mais tarde.';*/
+    }
+
+    onEdit(id: number){
+      this.router.navigate(['editar', id ], {relativeTo: this.route});
+    }
+
+    onDelete(curso: Curso){
+      this.cursoSelecionado = curso;
+      this.deleteModalRef = this.modalService.show(this.deleteModal, { class: 'modal-sm' });
+    }
+
+    onConfirmDelete() {
+      this.service.remove(this.cursoSelecionado.id).subscribe(
+        success => {this.onRefresh(), this.onDeclineDelete},
+        error => {this.alertService.showAlertDanger('Erro ao remover o curso. Tente novamente mais tarde'), this.onDeclineDelete}
+      );
+      this.deleteModalRef.hide();      
+    }
+   
+    onDeclineDelete() {
+      this.deleteModalRef.hide();
     }
 
 }
