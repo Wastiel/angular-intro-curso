@@ -12,7 +12,7 @@ import { UnsubscribeRxjsRoutingModule } from './unsubscribe-rxjs/unsubscribe-rxj
 
 const routes: Routes = [
   {
-    path: '', pathMatch: 'full', redirectTo: 'cursos' 
+    path: '', redirectTo: 'busca-reativa', pathMatch: 'full' 
   },
   {
     path: 'cursos', loadChildren: () => import('./cursos/cursos.module').then(m => m.CursosModule)
@@ -21,6 +21,13 @@ const routes: Routes = [
     path: 'rxjs-poc',
     loadChildren: () => import('./unsubscribe-rxjs/unsubscribe-rxjs.module').then(m => m.UnsubscribeRxjsModule)
   },
+  {
+    path: 'upload', loadChildren: () => import('./upload-file/upload-file.module').then(m => m.UploadFileModule)
+  },
+  {
+    path: 'busca-reativa',
+    loadChildren: () => import('./reactive-search/reactive-search.module').then(m => m.ReactiveSearchModule)
+  }
 ];
 
 @NgModule({

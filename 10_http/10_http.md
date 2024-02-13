@@ -1628,38 +1628,1403 @@ export class CursosService {
 	````
 
 # 17. Popup de Confirmação genérica Bootstrap 4 (com RxJS)
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/8Y6-SC10CMA)
 - vamos construir um componente reutilizavel
+- Vamos criar um poupu de confirmação genérica com bootstrap
+- Passar um texto genérico.
+- Criamos o componente confirm modal, dentro da pasta shared. 
+- adicionamos na module do shared o componente ConfirmModalcomponent, para poder ser visto e utilizado por todos. 
+- Pegamos um componente do bootstrap como modal e começamos a melhorar ele. 
+- Ambos os componentes de forma inicial ficam assim:
+	````html
+		<div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">{{ title }}</h5>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>{{ msg }}</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="onClose()">{{ cancelTxt }}</button>
+      <button type="button" class="btn btn-primary" (click)="onConfirm()">{{ okTxt }}</button>
+    </div>
+  </div>
+	````
+	````typeScript
+	import { Component, Input, OnInit } from '@angular/core';
+	import { BsModalRef } from 'ngx-bootstrap/modal';
+
+	@Component({
+	  selector: 'app-confirm-modal',
+	  templateUrl: './confirm-modal.component.html',
+	  styleUrls: ['./confirm-modal.component.scss']
+	})
+	export class ConfirmModalComponent implements OnInit{
+
+	  @Input() title!: string;
+	  @Input() msg!: string;
+	  @Input() cancelTxt = 'Cancelar';
+	  @Input() okTxt = 'Sim';
+
+	  constructor(public bsModalRef: BsModalRef) {}
+
+	  ngOnInit(): void {
+	    
+	  }
+
+	  onConfirm(){
+	    
+	  }
+
+	  onClose(){
+	    this.bsModalRef.hide();
+	  }
+
+	}
+
+	````
+- Fizemos um ajuste na classe de serviço, para realizar a chamada 
+	````typeScript
+		import { Injectable } from '@angular/core';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { AlertModalComponent } from './alert-modal/alert-modal.component';
+import { ConfirmModalComponent } from './confirm-modal/confirm-modal.component';
+
+enum AlertTypes {
+  DANGER = 'danger',
+  SUCCESS = 'success'
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AlertModalService {
+
+  //bsModalRef!: BsModalRef;
+  constructor(private modalService: BsModalService) { }
+
+  private showAlert( message: string, type: AlertTypes, dismissTimeout?:number){
+    const bsModalRef: BsModalRef = this.modalService.show(AlertModalComponent);
+    bsModalRef.content.type = type;
+    bsModalRef.content.message = message;
+
+    if(dismissTimeout){
+      setTimeout(() => bsModalRef.hide(), dismissTimeout);
+    }
+  }
+
+  showAlertDanger(message: string){
+    this.showAlert(message, AlertTypes.DANGER);
+  }
+
+  showAlerSuccess(message: string){
+    this.showAlert(message, AlertTypes.SUCCESS, 300000);
+  }
+
+  showConfirm(title: string, msg: string, okTxt?: string, cancelTxt?: string){
+  const bsModalRef: BsModalRef = this.modalService.show(ConfirmModalComponent);
+  bsModalRef.content.title = title;
+  bsModalRef.content.nsg = msg;
+
+  if(okTxt){
+    bsModalRef.content.okTxt = okTxt
+  }
+  if(cancelTxt){
+    bsModalRef.content.cancelTxt = okTxt
+  }
+}
+}
+
+	````
+- Vamos refatorar o codigo dentro do curso lista. 
+- Ajustamos os botao de cancelar e chamamos a modal
+	- Chamamos a função showConfirm, do nosso serviço
+	````typeScript
+		 onDelete(curso: Curso){
+      this.cursoSelecionado = curso;
+      //this.deleteModalRef = this.modalService.show(this.deleteModal, { class: 'modal-sm' });
+      this.alertService.showConfirm('Confirmação', 'Tem certeza que desja remover esse curso?', 'Sim', 'Cancelar' )
+    }
+	````
+- Concluimos a lógica da Modal:
+	````typeScript
+		import { Component, Input, OnInit } from '@angular/core';
+		import { BsModalRef } from 'ngx-bootstrap/modal';
+		import { Subject } from 'rxjs';
+
+		@Component({
+		  selector: 'app-confirm-modal',
+		  templateUrl: './confirm-modal.component.html',
+		  styleUrls: ['./confirm-modal.component.scss']
+		})
+		export class ConfirmModalComponent implements OnInit{
+
+		  @Input() title!: string;
+		  @Input() msg!: string;
+		  @Input() cancelTxt = 'Cancelar';
+		  @Input() okTxt = 'Sim';
+
+		  confirmResult!: Subject<boolean>;
+
+		  constructor(public bsModalRef: BsModalRef) {}
+
+		  ngOnInit(): void {
+		    this.confirmResult = new Subject();
+		    
+		  }
+
+		  onConfirm(){
+		    this.confirmAndClose(true);
+		  }
+
+		  onClose(){
+		    this.confirmAndClose(false);    
+		  }
+
+		  private confirmAndClose(value: boolean){
+		    this.confirmResult.next(value);
+		    this.bsModalRef.hide();
+		  }
+
+		}
+
+	````
+- Ajustamos para poder ver a opção clicada.
+	````typeScript
+		import { Injectable } from '@angular/core';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { AlertModalComponent } from './alert-modal/alert-modal.component';
+import { ConfirmModalComponent } from './confirm-modal/confirm-modal.component';
+
+enum AlertTypes {
+  DANGER = 'danger',
+  SUCCESS = 'success'
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AlertModalService {
+
+  //bsModalRef!: BsModalRef;
+  constructor(private modalService: BsModalService) { }
+
+  private showAlert( message: string, type: AlertTypes, dismissTimeout?:number){
+    const bsModalRef: BsModalRef = this.modalService.show(AlertModalComponent);
+    bsModalRef.content.type = type;
+    bsModalRef.content.message = message;
+
+    if(dismissTimeout){
+      setTimeout(() => bsModalRef.hide(), dismissTimeout);
+    }
+  }
+
+  showAlertDanger(message: string){
+    this.showAlert(message, AlertTypes.DANGER);
+  }
+
+  showAlerSuccess(message: string){
+    this.showAlert(message, AlertTypes.SUCCESS, 300000);
+  }
+
+  showConfirm(title: string, msg: string, okTxt?: string, cancelTxt?: string){
+  const bsModalRef: BsModalRef = this.modalService.show(ConfirmModalComponent);
+  bsModalRef.content.title = title;
+  bsModalRef.content.msg = msg;
+
+  if(okTxt){
+    bsModalRef.content.okTxt = okTxt
+  }
+  if(cancelTxt){
+    bsModalRef.content.cancelTxt = cancelTxt
+  }
+  return (<ConfirmModalComponent>bsModalRef.content).confirmResult;
+}
+}
+
+	````
+- Ajustamos a chamada da seguinemaneira:
+	````typeScript
+		onDelete(curso: Curso){
+      this.cursoSelecionado = curso;
+      //this.deleteModalRef = this.modalService.show(this.deleteModal, { class: 'modal-sm' });
+      const result$ = this.alertService.showConfirm('Confirmação', 'Tem certeza que desja remover esse curso?', 'Sim', 'Cancelar' )
+      result$.asObservable()
+      .pipe(
+        take(1),
+        switchMap(result => result ? this.service.remove(curso.id) : empty())
+      )
+      .subscribe( 
+        success => {this.onRefresh(), this.onDeclineDelete},
+        error => {this.alertService.showAlertDanger('Erro ao remover o curso. Tente novamente mais tarde'), this.onDeclineDelete}
+    );
+    
+    }
+
+    onConfirmDelete() {
+      this.service.remove(this.cursoSelecionado.id).subscribe(
+        success => {this.onRefresh(), this.onDeclineDelete},
+        error => {this.alertService.showAlertDanger('Erro ao remover o curso. Tente novamente mais tarde'), this.onDeclineDelete}
+      );
+      this.deleteModalRef.hide();      
+    }
+   
+    onDeclineDelete() {
+      this.deleteModalRef.hide();
+    }
+	````
 
 # 18. Http: Serviço Genérico de CRUD
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/qhYZgl1oitU)
+- Serviço genérico de CRUD, para nao precisarmos repetir o CRUD. 
+- Imagina fazer um crud de Aulas, de Alunos.
+- Padrao Repositório. 
+- Criamos um serviço Genérico de Crudo
+	- Crud Service
+	````TypeScript
+		import { HttpClient } from "@angular/common/http";
+import { Observable, delay, map, take, tap } from "rxjs";
+
+export class CrudService<T> {
+
+  constructor(protected http: HttpClient, private API_URL: string) { }
+
+    list(){
+      return this.http.get<T[]>(this.API_URL)
+      .pipe(
+        delay(2000),
+        tap(console.log)
+      );
+  
+    }
+  
+    loadByID(id: number): Observable<T> {
+      return this.http.get<T>(`${this.API_URL}/${id}`).pipe(
+        take(1),
+        map(T => T as T) // Convertendo o objeto retornado para o tipo Curso
+      );
+    }
+  
+    private create(record: any){
+      return this.http.post(this.API_URL, record).pipe(take(1));  }
+  
+    private update(record: any){
+      return this.http.put(`${this.API_URL}/${record.id}`, record).pipe(take(1));  }
+    
+    save(record: any){
+      if(record.id){
+        return this.update(record);
+      }
+      return this.create(record);
+    }
+  
+    remove(id: number){
+      return this.http.delete(`${this.API_URL}/${id}`).pipe(take(1));
+    }
+}
+	````
+- Criamos o curso 2, onde chamamos o serviço genérico cursos2.service.ts
+	````typeScript
+import { Injectable } from '@angular/core';
+import { CrudService } from '../shared/crud-service';
+import { Curso } from './curso';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'environments/environment';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class Cursos2Service extends CrudService<Curso>{
+
+  constructor(protected override http: HttpClient) { 
+    super(http, `${environment.API}cursos` );
+  }  
+
+}
+
+		
+	````
+- alteramos a chamada no componente lista 
+````typeScript
+	export class CursosListaComponent implements OnInit{
+
+  //cursos!: Curso[];
+  
+  error$ = new Subject<boolean>();
+  cursos$!: Observable<Curso[]>;
+
+  cursoSelecionado!: Curso;
+
+  deleteModalRef!: BsModalRef;
+  @ViewChild('deleteModal') deleteModal: any;
+
+  constructor(private service: Cursos2Service,
+    private modalService: BsModalService,
+    private alertService: AlertModalService,
+    private router: Router,
+    private route: ActivatedRoute   
+    ){}
+````
+- Com isto criamos um crud genérico onde podemos apontar para qualquer serviço.
 
 # 19. Upload de Arquivo Formulário Upload com Bootstrap 4
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/GKNIzIXrwT8)
+- Criamos um arquivo de módulo com roteamento
+	- ng g m upload-file --routing
+- Criamos também um componente
+	- ng g c upload-file/upload-file
+- Criamos um llink novo no nosso app componente
+	````html
+			<li class="nav-item">
+          <a class="nav-link" routerLinkActive="active" [routerLink]="['/upload']">Upload Arquivo</a>
+      </li>    
+	````
+- Ajustamos o nosso routing da nossa janela. 
+	````typeScript
+		{
+    path: 'upload', loadChildren: () => import('./upload-file/upload-file.module').then(m => m.UploadFileModule)
+  	},
+	```` 
+- Ajustamos a nossa rota do uploadFileComponent
+	````typeScript
+		const routes: Routes = [
+		  {path: '', component: UploadFileComponent}
+		];
+	````
+- Configurei a aplicação para pegar como primeiro link o upload.
+- Vamos pegar um formulário do bootstrap para criar nosso upload.
+	````html
+	  <div class="input-group mb-3">
+    <input type="file" class="form-control" id="inputGroupFile01" multiple for="inputGroupFile01">
+  </div>
+
+  <!-- Abaixo o feito em aula-->
+
+  <div style="margin-top: 10px">
+    <div class="custom-file">
+      <input
+        type="file"
+        class="custom-file-input"
+        id="customFile"
+        (change)="onChange($event)"
+        multiple
+      />
+      <label class="custom-file-label" for="customFile" id="customFileLabel"
+        >Selecionar Arquivo</label
+      >
+    </div>
+	````
+- multiple, serve para pegar os demais arquivos.
 
 # 20. Upload de Arquivo: Back-end com Node.js
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/T8xBgT0Xkzs)
+- Vamos escrever o código em node, para consumir este arquivo.
+- Vamos criar um backend para podermos organizar nosso upload.
+- Criamos uma pasta chamada server
+- Usamos o comando dentro da pasta chamada server
+	- npm init -y
+	- Posterior instalamos as dependencias abaixo:
+	- npm install -save express body-parser connect-multiparty cors
+- criamos uma pasta src dentro do nosso server
+- colocamos o arquivo index.js com as seguintes informações:
+	````js
+		const express = require('express');
+		const cors = require('cors'); 
+		const bodyParser = require('body-parser');
+		const multipart = require('connect-multiparty');
+
+		const app = express();
+
+		app.listen(8000, () => {
+		    console.log('Servidor porta 8000');
+		    
+		}) 
+	````
+- Ajustamos o nosso json para pegar os caminhos corretos das solicitações
+	````json
+		{
+	  "name": "server",
+	  "version": "1.0.0",
+	  "description": "",
+	  "main": "src/index.js",
+	  "scripts": {
+	    "start": "node src/index.js",
+	    "test": "echo \"Error: no test specified\" && exit 1"
+	  },
+	  "keywords": [],
+	  "author": "",
+	  "license": "ISC",
+	  "dependencies": {
+	    "body-parser": "^1.20.2",
+	    "connect-multiparty": "^2.2.0",
+	    "cors": "^2.8.5",
+	    "express": "^4.18.2"
+	  }
+	}
+
+	````
+- iniciamos o servidor para ver se esta tudo certo: 
+	- npm run start
+	- Vai mostrar uma mensagem dizendo 'servidor porta 8000'
+- configuramos o cors, de forma provisoria, para contrato de comunicação de API's
+	- Vamos fazer diferente no futuro
+	````JS
+			const express = require('express');
+			const cors = require('cors'); 
+			const bodyParser = require('body-parser');
+			const multipart = require('connect-multiparty');
+
+			const app = express();
+			app.arguments(bodyParser.json());
+			app.use(bodyParser.urlencoded({extended: true}))
+
+			const corsOptions = {
+			    origin: '*',
+			    optionSuccessStatus: 200
+			};
+
+			app.use(cors(corsOptions));
+
+
+			app.listen(8000, () => {
+			    console.log('Servidor porta 8000');
+			    
+			}) 
+	````
+
+- A ideia é pegarmos o arquivo e salvarmos no servidor
+- Criamos uma pasta de uploads, para receber estes nosso arquivos
+- com isto temos a conclusão do upload de arquivos no nosso servidor:
+	````typescript
+		const express = require('express');
+		const cors = require('cors'); 
+		const bodyParser = require('body-parser');
+		const multipart = require('connect-multiparty');
+
+		const app = express();
+		app.use(bodyParser.json());
+		app.use(bodyParser.urlencoded({extended: true}))
+
+		const corsOptions = {
+		    origin: '*',
+		    optionSuccessStatus: 200
+		};
+
+		app.use(cors(corsOptions));
+
+		const multipartMiddleware = multipart({uploadDir: './uploads'})
+		app.post('/upload', multipartMiddleware, (req, res) =>{
+		    const files = req.files;
+		    console.log(files);
+		    res.json({message: files});
+
+		})
+
+		app.use((err, req, res, next) => res.json({error: err.message}));
+
+		app.listen(8000, () => {
+		    console.log('Servidor porta 8000');
+		    
+		}) 
+	````
 
 # 21. Upload de Arquivo: Request com FormData
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/p5XFCr1GJJ4)
+- Vamos utilizar o nosso componente do back, para simular um upload de arquivo.
+- Vamos criar um botao para realizar o processo de controle. 
+- Criamos o seguinte botão:
+	````html
+		  <div style="margin-top: 10px">
+  	  <button type="button" class="btn btn-primary" (click)="onUpload()" >
+	      Upload
+	    </button>
+	  	</div>
+
+	````
+- COnfiguramos uma variavel para pegar todos os arquivos que forem feito upload.
+	````typeScript
+		export class UploadFileComponent {
+	  files!: Set<File>;
+	  constructor() {}
+
+	  ngOnInit() {}
+
+	  onChange(event: any) {
+	    console.log(event);
+
+	    const selectedFiles = <FileList>event.srcElement.files;
+	    const customFileLabel = document.getElementById('customFileLabel');
+	    if (customFileLabel) {
+	      customFileLabel.innerHTML = selectedFiles[0].name;
+	    }
+	    const fileNames = [];
+
+	    this.files = new Set();
+
+	    for (let i = 0; i < selectedFiles.length; i++) {
+	      fileNames.push(selectedFiles[i].name);
+	      if (customFileLabel) {
+	        customFileLabel.innerHTML = fileNames.join(', ');
+	        this.files.add(selectedFiles[i])
+	      }
+	    }
+	  }
+
+	````
+- Criamos um serviço do upload files
+	- ng g s upload-files/upload-files
+- Vamos configurar o nosso serviço.
+- Criamos a classe de serivo:
+	````typeScript
+		import { HttpClient, HttpRequest } from '@angular/common/http';
+		import { Injectable } from '@angular/core';
+
+		@Injectable({
+		  providedIn: 'root'
+		})
+		export class UploadFileService {
+
+		  constructor(private http: HttpClient) { }
+
+		  upload(files: Set<File>, url: string){
+
+		    const formData = new FormData();
+		    files.forEach(file => formData.append('file', file, file.name))
+		    const request = new HttpRequest('POST', url, formData);
+
+		    return this.http.request(request);
+		  }
+		}
+
+	````
+- instanciamos o serviço e criamos a nossa classe de upload
+	````typeScript	
+
+	files!: Set<File>;
+  constructor(private service: UploadFileService)
+
+	onUpload(){
+    if (this.files && this.files.size >0){
+      this.service.upload(this.files, 'http://localhost:8000/upload')
+      .subscribe(response => console.log('upload Concluído'));
+    }
+  }
+	````
+- Posterio iniciamos o servidor dentro da pasta server
+	- npm run start
+- Posterior iniciamos o servidor
+	- ng serve
+- Posterior testamos e temos arquivos com upload no servidor uploads. 
+- Fizemos um ajuste para testar o serviço com o http post ao inves do http request
+	````typeScript
+	import { HttpClient, HttpRequest } from '@angular/common/http';
+	import { Injectable } from '@angular/core';
+
+	@Injectable({
+	  providedIn: 'root'
+	})
+	export class UploadFileService {
+
+	  constructor(private http: HttpClient) { }
+
+	  upload(files: Set<File>, url: string){
+
+	    const formData = new FormData();
+	    files.forEach(file => formData.append('file', file, file.name))
+	    //const request = new HttpRequest('POST', url, formData);
+
+	    //return this.http.request(request);
+	    return this.http.post(url, formData);
+	  }
+}
+
+	````
+- Tudo continupou funcionando sem erros
 
 # 22. Http: Removendo CORS com Angular Proxy
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/D9oFe6rHjpY)
+- Remover o cors e utilizar o proxy, que vem automaticamente no angular cli
+- Hoje o cors libera o nosso projeto pra qualquer um ver, a nossa ideia é que tenhamos limitação para as pessoas poderem ver a nossa api de upload
+- Indiferente da linguagem, existe diversas possibilidades.
+- Não tem problema ter um monolito back end e front end juntos.
+- Vamos desabilitar alguns pontos do cors, para habilitarmos o prosy
+- Ajustamos o nosso index.js do nosso servidor
+	````js
+		const express = require('express');
+		//const cors = require('cors'); 
+		const bodyParser = require('body-parser');
+		const multipart = require('connect-multiparty');
+
+		const app = express();
+		app.use(bodyParser.json());
+		app.use(bodyParser.urlencoded({extended: true}))
+
+		/*const corsOptions = {
+		    origin: '*',
+		    optionSuccessStatus: 200
+		};
+
+		app.use(cors(corsOptions));
+		*/
+		const multipartMiddleware = multipart({uploadDir: './uploads'})
+		app.post('/upload', multipartMiddleware, (req, res) =>{
+		    const files = req.files;
+		    console.log(files);
+		    res.json({message: files});
+
+		})
+
+		app.use((err, req, res, next) => res.json({error: err.message}));
+
+		app.listen(8000, () => {
+		    console.log('Servidor porta 8000');
+		    
+		}) 
+	````
+- iniciamos o servidor, iniciamos o ambiente, posterior ao testarmos temos bloqueio de cros origin, nao deixando a gente fazer um upload
+	````console
+		Access to XMLHttpRequest at 'http://localhost:8000/upload' from origin 'http://localhost:4200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+	````
+- Não conecta por serem dominios diferentes
+- como configuramos o core do angular para conectar em dominios diferentes
+- Vamos criar de duas maneiras este proxy.
+- Primeiramente vamos testar como js
+	- proxy.conf.js
+	````js
+	const PROXY_CONFIG  = [
+	    {
+	    context: ['/api'],
+	    target: 'http://localhost:8000/',
+	    secure: false,
+	    loglevel: 'debug',
+	    pathRewrite: {'^/api': ''}
+
+	    }
+	];
+
+	module.exports = PROXY_CONFIG;
+
+
+	````
+	- Fica complicado de istinguir o que é rota para o que é backend. 
+		- Vamos construir uma convenção
+	- /api nunca vai ser rota e sim uma chamada para o backend.
+	- Ajustamos o nosso package.json para olhar para o nosso proxy.
+	````json
+			  "scripts": {
+		    "ng": "ng",
+		    "start": "ng serve --proxy-config proxy.conf.js",
+		    "build": "ng build",
+		    "watch": "ng build --watch --configuration development",
+		    "test": "ng test"
+		  },
+	````
+	- Vamos startar o servidor com npm run start
+	- Tivemos erro, porém conseguimos ajustar corrigindo o componente
+	````typeScript
+		  onUpload(){
+	    if (this.files && this.files.size >0){
+	      this.service.upload(this.files, '/api/upload')
+	      .subscribe(response => console.log('upload Concluído'));
+	    }
+
+	  }
+	````
+- Outra maneira é fazendo um proxy para um arquivo json
+	- Criamos um arquivo json
+	- proxy.conf.json
+	````json
+		{
+		    "/api/*": {
+		        "target": "http://localhost:8000",
+		        "secure": false,
+		        "logLevel": "debug",
+		        "pathRewrite": {
+		            "^/api": ""
+		        }
+		    }
+
+		}
+	````
+- Quando vamos para desenvolvimento, podemos usar o enviroment. 
+- Ajustamos o nosso enviroment, para nao deixar a api chumbada no código.
+	````typeScript
+		// environment.ts
+		export const environment = {
+		    production: false,
+		    API: 'http://localhost:3000/',
+		    BASE_URL: '/api'
+		  };
+	````
+- Nosso Componente
+	````typeScript
+		  onUpload(){
+	    if (this.files && this.files.size >0){
+	      this.service.upload(this.files, environment.BASE_URL + '/upload')
+		      .subscribe(response => console.log('upload Concluído'));
+		    }
+
+		  }
+	````
+- Com isto nosso componente fica funcionando sem estar chumbado. 
+
 
 # 23. Upload Arquivo: Barra de Progresso + Observando Eventos Http
-- [Vídeo Aula]()
+
+- [Vídeo Aula](https://youtu.be/-Be5Q2dj2Tc)
+- Observar eventos e implementar uma barra de progresso.
+- upload de um arquivo maior, para vermos o progresso. 
+- Muito tempo para envio de arquivos grandes, vamos colocar uma barra de progresso. 
+- Ajustamos o nosso serviço, para o angular observar todos os eventos e reportar os mesmos
+	````typeScript
+			upload(files: Set<File>, url: string){
+
+	    const formData = new FormData();
+	    files.forEach(file => formData.append('file', file, file.name))
+	    //const request = new HttpRequest('POST', url, formData);
+
+	    //return this.http.request(request);
+	    return this.http.post(url, formData, {
+	      observe: 'events',
+	      reportProgress: true
+	    });
+	      
+	  }
+	````
+- posterior vamos ajustar a nossa função onUpload para pegar alguns eventos e poder construir o progress bar
+	````typeScript
+		  onUpload(){
+	    if (this.files && this.files.size >0){
+	      this.service.upload(this.files, environment.BASE_URL + '/upload')
+	      .subscribe(response => {
+	        //HttpEventType
+	        console.log(response);
+	        console.log('upload Concluído')
+	      });
+	    }
+	````
+- Olhamos a classe HttpEventType e identificamos o que seria o processo. 
+	- Varios fatores, conseguimos pegar o progresso de upload de arquivo chamado:
+		- UploadProgress = 1
+- Criamos um html para colocar o progress bar em tela:
+	````html
+	    <div class="progress">
+      <div      
+      class="progress-bar" 
+      role="progressbar" 
+      [style.width]="progress + '%'"
+      >
+      {{ progress }}%
+      </div>
+    </div>
+	````
+- Posterior ajustamos o nosso upload
+	````typeScript
+		  onUpload(){
+	    if (this.files && this.files.size >0){
+	      this.service.upload(this.files, environment.BASE_URL + '/upload')
+	      .subscribe((event: HttpEvent<Object>) => {
+	        //HttpEventType
+	        //console.log(event);
+	        if(event.type === HttpEventType.Response){
+	          console.log('upload Concluído');
+	        }else if (event.type === HttpEventType.UploadProgress && event.total){
+	          const percentDone = Math.round((event.loaded * 100) / event.total);
+	          //console.log('progresso', percentDone)
+	          this.progress = percentDone;
+	        }
+	        
+	      });
+	    }
+	  }
+	````
 
 # 24. Criando operador RxJS customizado
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/XytlhgqzBeY)
+- Criar um RxJS customizado para deixar o nosso código mais limpo.
+- Vamos criar dois operadores RxJS
+- Criamos o arquivo shared/rxjs-operators.ts
+	````typeScript
+			import { HttpEvent, HttpEventType, HttpResponse } from "@angular/common/http";
+			import { pipe } from "rxjs";
+			import { filter, map, tap } from "rxjs/operators";
+
+			export function filterResponse<T>(){
+			    return pipe(
+			        filter((event: HttpEvent<T>) => event.type === HttpEventType.Response),
+			        map((res: any) => res.body)
+			    );
+			}
+
+			export function uploadProgress(cb: (progress: number) => void) {
+			    return tap((event: any) => {
+			        if(event.type === HttpEventType.UploadProgress){
+			            cb(Math.round((event.loaded * 100) / event.total!))
+			        }
+			    });
+			}
+	````
+- Agora vamos ajustar a lógica do nosso upload
+	````typeScript
+		 onUpload(){
+	    if (this.files && this.files.size >0){
+	      this.service.upload(this.files, environment.BASE_URL + '/upload')
+	      .pipe(
+	        uploadProgress(progress => {
+	          console.log(progress);
+	          this.progress = progress;
+	        }),
+	        filterResponse()
+	      )
+	      .subscribe(response =>console.log('Upload Concluido'))
+	      /*.subscribe((event: HttpEvent<Object>) => {
+	        //HttpEventType
+	        console.log(event);
+	        if(event.type === HttpEventType.Response){
+	          console.log('upload Concluído');
+	        }else if (event.type === HttpEventType.UploadProgress && event.total){
+	          const percentDone = Math.round((event.loaded * 100) / event.total);
+	          console.log('progresso', percentDone)
+	          this.progress = percentDone;
+	        }
+	        
+	      });*/
+	    }
+	  }
+	````
+- Ao testarmos novamente o fluxo funciona com dois operadores simples
 
 # 25. Download de Arquivo
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/4ol_RxZ08HQ)
+- Fluxo de download de arquivos do servidor.
+- vamos utilizar dois botões para fazer download dos arquivos.
+- Criamos os botões de forma simples
+	````html	
+  <div style="margin-top: 10px">
+    <button type="button" class="btn btn-primary" (click)="onDownloadExcel()" >
+      Download Excel
+    </button>
+    <button type="button" class="btn btn-primary" (click)="onDownloadPDF()" >
+      Download PDF
+    </button>
+  </div>
+	````
+- Criamos uma chamada para fazer o download dos arquivos, para um simples teste
+	````js
+		app.get ('/downloadExcel', (req, res) => {
+    res.download('./uploads/report.xlsx');
+		});
+
+		app.get ('/downloadPDF', (req, res) => {
+		    res.download('./uploads/report.pdf');
+		});
+
+	````
+- Criamos uma chamada no nosso service.
+	````typeScript
+		  download(url: string){
+	    return this.http.get(url, {
+	      responseType: 'blob' as 'json',
+	      //reportProgress
+	      // content-length
+	    });
+	  }
+	````
+- agora vamos construir as nossas funções para realiar o download das mesmas
+- Criamos a função para download no chrome.
+	````typeScript
+		  onDownloadExcel(){
+	    this.service.download(environment.BASE_URL + '/downloadExcel')
+	    .subscribe((res: any) => {
+	      const file = new Blob([res], {
+	        type: res.type
+	      });
+
+	      const blob = window.URL.createObjectURL(file);
+
+	      const link = document.createElement('a');
+	      link.href = blob;
+	      link.download = 'report.xlsx';
+	      link.click();
+
+	      window.URL.revokeObjectURL(blob);
+	      link.remove();    
+	    });
+	  }
+
+	````
+- Criamos a função para o IE
+	````typeScript
+		 //IE  
+    const isMicrosoftBrowser = !!window.navigator.userAgent.match(/(Trident|Edge)/);
+
+    if (isMicrosoftBrowser) {
+    const nav = window.navigator as any;
+    if (nav && nav.msSaveOrOpenBlob) {
+        nav.msSaveOrOpenBlob(file);
+    }    
+
+	````
+- Complementando para firefox e funcionando para todos browsers
+	````typeScript
+		 onDownloadExcel() {
+	    this.service
+	      .download(environment.BASE_URL + '/downloadExcel')
+	      .subscribe((res: any) => {
+	        const file = new Blob([res], {
+	          type: res.type,
+	        });
+
+	        //IE
+	        const isMicrosoftBrowser =
+	          !!window.navigator.userAgent.match(/(Trident|Edge)/);
+
+	        if (isMicrosoftBrowser) {
+	          const nav = window.navigator as any;
+	          if (nav && nav.msSaveOrOpenBlob) {
+	            nav.msSaveOrOpenBlob(file);
+	          }
+	        }
+	        //Fim IE
+	        const blob = window.URL.createObjectURL(file);
+
+	        const link = document.createElement('a');
+	        link.href = blob;
+	        link.download = 'report.xlsx';
+	        link.click();
+
+	        //link click()
+
+	        link.dispatchEvent(
+	          new MouseEvent('click', {
+	            bubbles: true,
+	            cancelable: true,
+	            view: window,
+	          })
+	        );
+
+	        setTimeout(() => {
+	          // para firefox
+	          window.URL.revokeObjectURL(blob);
+	          link.remove();
+	        });
+	      });
+	  }
+	````	
+- Vamos refatorar o código
+	- Primeiramente no nosso serviço, chamamos uma função genérica
+	````typeScript
+			handleFiles(res: any, filename: string) {
+	    const file = new Blob([res], {
+	      type: res.type,
+	    });
+
+	    //IE
+	    const isMicrosoftBrowser =
+	      !!window.navigator.userAgent.match(/(Trident|Edge)/);
+
+	    if (isMicrosoftBrowser) {
+	      const nav = window.navigator as any;
+	      if (nav && nav.msSaveOrOpenBlob) {
+	        nav.msSaveOrOpenBlob(file);
+	      }
+	    }
+	    //Fim IE
+	    const blob = window.URL.createObjectURL(file);
+
+	    const link = document.createElement('a');
+	    link.href = blob;
+	    link.download = filename;
+	    link.click();
+
+	    //link click()
+
+	    link.dispatchEvent(
+	      new MouseEvent('click', {
+	        bubbles: true,
+	        cancelable: true,
+	        view: window,
+	      })
+	    );
+
+	    setTimeout(() => {
+	      // para firefox
+	      window.URL.revokeObjectURL(blob);
+	      link.remove();
+	    });
+	  }
+	````
+	- com isto conseguimos atualizar o código fonte do 
+	````typeScript
+		 onDownloadExcel() {
+    this.service
+	      .download(environment.BASE_URL + '/downloadExcel')
+	      .subscribe((res: any) => {
+	        this.service.handleFiles(res, 'report.xlsx')       
+	      });
+	  }
+
+	  onDownloadPDF() {
+	    this.service
+	    .download(environment.BASE_URL + '/downloadExcel')
+	    .subscribe((res: any) => {
+	      this.service.handleFiles(res, 'report.pdf')       
+	    });
+	  }
+	````
 
 # 26. Criando tela de pesquisa
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/dgVR17Xmn8A)
+- Vamos criar uma tela de pesquisa para nos prepararmos para as próximas duas aulas. 
+- Criamos um módulo e uma rota nova para o nosso método de pesquisa. 
+- Criamos um novo botão HTML para a nossa página para lingar o busca reativa
+	````html
+			<li class="nav-item">
+          <a class="nav-link" routerLinkActive="active" [routerLink]="['/busca-reativa']">Busca Reativa</a>
+       </li>              
+	````
+- Também ajustamos a lógica do roteamento
+	````typeScript
+		const routes: Routes = [
+  {
+    path: '', redirectTo: 'upload', pathMatch: 'full' 
+  },
+  {
+    path: 'cursos', loadChildren: () => import('./cursos/cursos.module').then(m => m.CursosModule)
+  },
+  {
+    path: 'rxjs-poc',
+    loadChildren: () => import('./unsubscribe-rxjs/unsubscribe-rxjs.module').then(m => m.UnsubscribeRxjsModule)
+  },
+  {
+    path: 'upload', loadChildren: () => import('./upload-file/upload-file.module').then(m => m.UploadFileModule)
+  },
+  {
+    path: 'busca-reativa',
+    loadChildren: () => import('./reactive-search/reactive-search.module').then(m => m.ReactiveSearchModule)
+  }
+];
+	````
+- Criamos o componente lib search
+	- ng g c reactive-search/lib-search
+- Ajustamos o reactive-search routing
+	````typeScript
+				import { NgModule } from '@angular/core';
+				import { RouterModule, Routes } from '@angular/router';
+				import { LibSearchComponent } from './lib-search/lib-search.component';
+
+				const routes: Routes = [
+				  {
+				    path: '', component: LibSearchComponent
+				  }
+				];
+
+				@NgModule({
+				  imports: [RouterModule.forChild(routes)],
+				  exports: [RouterModule]
+				})
+				export class ReactiveSearchRoutingModule { }
+
+	````
+- É utilizado o bootstrap snipet
+	[Link snipet](https://bootsnipp.com/snippets/Q0eE1)
+- Ajustamos o nosso html e o nosso CSS da seguinte maneira:
+	````html
+	<!------ 
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	Include the above in your HEAD tag ---------->
+
+	<div class="container search-table">
+	    <div class="search-box">
+	        <div class="row">
+	            <div class="col-md-9">
+	                <input 
+	                type="text" 
+	                id="myInput" 
+	                class="form-control" 
+	                [formControl]="queryField"
+	                placeholder="Pesquisar libs"
+	                />                
+	            </div>
+	            <div class="col-auto">                 
+	                <button type="button" class="btn btn-success" (click)="onSearch()">Pesquisar</button>
+	            </div>
+	        </div>
+	    </div>
+	    <div class="search-list">
+	        <h3>303 Records Found</h3>
+	        <table class="table" id="myTable">
+	            <thead>
+	                <tr>
+	                    <th>Title</th>
+	                    <th>Category</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                <tr>
+	                    <td>HTML</td>
+	                    <td>Web Development</td>
+	                </tr>                
+	            </tbody>
+	        </table>
+
+	    </div>
+	</div>
+	````
+	````css
+		.search-table{
+    padding: 10%;
+    margin-top: -6%;
+		}
+		.search-box{
+		    background: #007bff;
+		    border: 1px solid #ababab;
+		    padding: 3%;
+		}
+		.search-box input:focus{
+		    box-shadow:none;
+		    border:2px solid #eeeeee;
+		}
+		.search-list{
+		    background: #fff;
+		    border: 1px solid #ababab;
+		    border-top: none;
+		}
+		.search-list h3{
+		    background: #eee;
+		    padding: 3%;
+		    margin-bottom: 0%;
+		}
+	````
+- colocamos o ReactiveFormsModule dentro do nosso módulo
+- Adicionamos uma lógica mais simples no nosso componente
+	````typeScript
+		import { Component } from '@angular/core';
+		import { FormControl } from '@angular/forms';
+
+		@Component({
+		  selector: 'app-lib-search',
+		  templateUrl: './lib-search.component.html',
+		  styleUrls: ['./lib-search.component.scss']
+		})
+		export class LibSearchComponent {
+
+		  queryField = new FormControl();
+
+		  ngOnInit(){
+		  }
+
+		  onSearch(){    
+		    console.log(this.queryField.value);
+		  }
+		}
+
+	````
+- Ao testarmos o que digitamos aparece no console escrito
 
 # 27. Http: Passando Parâmetros na URL (HttpParams)
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/eJf_-pv6C34)
+- Vamos fazer a pesquisa e passar parametros via pesquisa.
+- Vamos consumir uma API externa. 
+- Vamos utilizar CDN com bibliotecas de javascript
+	- [CDNJS-API](https://cdnjs.com/api)
+- Criamos de forma mais imples sem serviço a construção da chamada até a api (Depois podemos adaptar via serviço)
+	````typeScript
+		import { HttpClient } from '@angular/common/http';
+		import { Component } from '@angular/core';
+		import { FormControl } from '@angular/forms';
+		import { Observable, map, tap } from 'rxjs';
+
+		@Component({
+		  selector: 'app-lib-search',
+		  templateUrl: './lib-search.component.html',
+		  styleUrls: ['./lib-search.component.scss']
+		})
+		export class LibSearchComponent {
+		  
+		  queryField = new FormControl();
+		  readonly SEARCH_URL = 'https://api.cdnjs.com/libraries';
+		  results$!: Observable<any>;
+		  total!: number;
+
+		  constructor(private http: HttpClient){
+		    
+		  }
+
+		  ngOnInit(){
+		  }
+
+		  onSearch(){    
+		    console.log(this.queryField.value);
+		    this.results$ = this.http.get(this.SEARCH_URL + '?search=angular').pipe(
+		      tap((res: any )=> this.total  = res.total),
+		      map((res: any ) => res.results)      
+		    );
+		  }
+		}
+
+	````
+	- Olhamos para a api: https://api.cdnjs.com/libraries, com os possíveis prametros que ela aceita.
+		- Primeiro consumo que testamos foi uma URL mais setada
+		- this.SEARCH_URL + '?search=angular' onde ocorre a junção da APi mais um search chumbado no código.
+- Também podemos fazer a busca trazendo diversos campos:
+	- https://api.cdnjs.com/libraries +  '?fields=name,description,version,homepage&search=angular'
+	- Com isto no nosso HTML trazemos os campos especificos:
+	````html
+			<div class="search-list">
+	        <h3>{{ total }} Registros encontrados</h3>
+	        <table class="table" id="myTable">
+	            <thead>
+	                <tr>
+	                    <th>Nome</th>
+	                    <th>Versão</th>
+	                    <th>Latest</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                <tr *ngFor="let result of results$ | async">
+	                    <td>{{ result.name }}</td>
+	                    <td>{{ result.version}}</td>
+	                    <td>{{ result.latest}}</td>
+	                </tr>                
+	            </tbody>
+	        </table>
+	    </div>
+	````
+- Ajustamos a nossa busca para trazer dados, somente se colocarmos valor no campo de busca
+	````typeScript
+	  onSearch() {
+    const fields = 'name,description,version,homepage'
+    let value = this.queryField.value;
+    if (value && (value = value.trim()) != '') {
+      console.log(this.queryField.value);
+      this.results$ = this.http
+        .get(
+          this.SEARCH_URL +
+            '?fields' +
+            fields +
+            '&search=' +            
+            value
+        )
+        .pipe(
+          tap((res: any) => (this.total = res.total)),
+          map((res: any) => res.results)
+        );
+    }
+  }
+
+	````
+- No angular, para evitarmos erros de parametros, consegiumos utilizar o http. 
+- podemos utilizar diversas maneiras para buscas na api
+	````typeScript
+			onSearch() {
+	    const fields = 'name,description,version,homepage'
+	    let value = this.queryField.value;
+
+	    const params2 = {
+	      search: value,
+	      fields: fields
+	    };
+
+	    let params = new HttpParams();
+	    params = params.set('search', value);
+	    params = params.set('fields', fields);
+
+	    if (value && (value = value.trim()) != '') {
+	      console.log(this.queryField.value);
+	      this.results$ = this.http
+	        .get(
+	          this.SEARCH_URL, {params} 
+	        )
+	        .pipe(
+	          tap((res: any) => (this.total = res.total)),
+	          map((res: any) => res.results)
+	        );
+	    }
+	  }	
+	````
+	- Se analizarmos acima, temos duas variaveis params, que poderiamos passar no search_url, e o projeto contiunar funcionando.
+
 
 # 28. Pesquisa/Busca com Programação Reativa
-- [Vídeo Aula]()
+- [Vídeo Aula](https://youtu.be/IrgKtm3e8Yc)
+- Pesquisa ou busca com programação reativa.
+- legal ver os resultados conforme vamos digitando.
+	- Auto sugestão
+	- Auto complete
+- Ao digitarmos busca dados, mas temos que cuidar para nao ser muito penoso para o nosso servidor e o ideal é colocarmos algumas validações. 
+- colocamos uma quantidade minima de caractares.
+- ficamos com a nossa function da seguinte maneira:
+	````typeScript
+		import { HttpClient, HttpParams } from '@angular/common/http';
+		import { Component } from '@angular/core';
+		import { FormControl } from '@angular/forms';
+		import { Observable, debounceTime, distinct, distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs';
+
+		@Component({
+		  selector: 'app-lib-search',
+		  templateUrl: './lib-search.component.html',
+		  styleUrls: ['./lib-search.component.scss'],
+		})
+		export class LibSearchComponent {
+		  queryField = new FormControl();
+		  readonly SEARCH_URL = 'https://api.cdnjs.com/libraries';
+		  results$!: Observable<any>;
+		  total!: number;
+		  readonly FIELDS = 'name,description,version,homepage'
+
+		  constructor(private http: HttpClient) {}
+
+		  ngOnInit() {
+		    this.results$ =  this.queryField.valueChanges
+		      .pipe(        
+		        map(value => value.trim()),
+		        filter(value => value.length >1),
+		        debounceTime(200),
+		        distinctUntilChanged(),
+		        //tap(value => console.log(value)),
+		        switchMap(value => this.http.get(this.SEARCH_URL, {
+		          params: {
+		            search: value,
+		            fields: this.FIELDS
+		          }
+		        })), 
+		        tap((res: any) => this.total = res.total),
+		        map((res: any) => res.results)       
+		    );
+		  }
+
+		  onSearch() {
+		    const fields = 'name,description,version,homepage';
+		    let value = this.queryField.value;
+
+		    const params2 = {
+		      search: value,
+		      fields: fields
+		    };
+
+		    let params = new HttpParams();
+		    params = params.set('search', value);
+		    params = params.set('fields', fields);
+
+		    if (value && (value = value.trim()) != '') {
+		      console.log(this.queryField.value);
+		      this.results$ = this.http
+		        .get(
+		          this.SEARCH_URL, {params} 
+		        )
+		        .pipe(
+		          tap((res: any) => (this.total = res.total)),
+		          map((res: any) => res.results)
+		        );
+		    }
+		  }
+		}
+
+	````
+- Ao começarmos a digitar a busca vai ocorrer, pois usamos a atualização da variavel de forma automática com parametros de tempo.
