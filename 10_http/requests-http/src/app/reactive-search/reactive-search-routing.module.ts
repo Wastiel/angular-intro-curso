@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { UnsubscribePocComponent } from './unsubscribe-poc/unsubscribe-poc.component';
+import { LibSearchComponent } from './lib-search/lib-search.component';
 
 const routes: Routes = [
   {
-    path: 'rxjs-poc', component: UnsubscribePocComponent
+    path: '', component: LibSearchComponent
   }
 ];
 
@@ -12,4 +12,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class UnsubscribeRxjsRoutingModule { }
+export class ReactiveSearchRoutingModule { }
